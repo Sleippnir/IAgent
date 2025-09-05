@@ -6,7 +6,7 @@ Plataforma de entrevistas automatizadas basada en microservicios que utiliza IA 
 
 ### Servicios
 
-- **API Gateway**: Punto de entrada único, maneja autenticación, WAF y enrutamiento.
+- **API Gateway**: Punto de entrada único, maneja autenticación y enrutamiento.
 - **Core**: Gestión de usuarios, roles, invitaciones y entrevistas.
 - **Orchestrator**: Coordina la comunicación en tiempo real entre servicios.
 - **Speech**: Provee servicios de STT y TTS en tiempo real.
