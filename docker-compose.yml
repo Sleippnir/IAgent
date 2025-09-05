@@ -1,0 +1,209 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/gateway
+      - CORE_SERVICE_URL=http://core:8001
+      - LLM_SERVICE_URL=http://llm:8004
+      - SPEECH_SERVICE_URL=http://speech:8003
+    env_file: .env
+    depends_on:
+      - mongodb
+      - core
+      - orchestrator
+      - speech
+      - llm
+      - evaluation-reporting
+    volumes:
+      - ./api-gateway:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Core Service
+  core:
+    build: ./services/core
+    ports:
+      - "8001:8001"
+    environment:
+      - POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/interviews
+      - REDIS_URI=redis://redis:6379/0
+    env_file: .env
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./services/core:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Orchestrator Service
+  orchestrator:
+    build: ./services/orchestrator
+    ports:
+      - "8002:8002"
+    environment:
+      - REDIS_URI=redis://redis:6379/0
+      - STT_SERVICE_URL=http://speech:8003
+      - LLM_SERVICE_URL=http://llm:8004
+      - TTS_SERVICE_URL=http://speech:8003
+    env_file: .env
+    depends_on:
+      - redis
+      - speech
+      - llm
+    volumes:
+      - ./services/orchestrator:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Speech Service (STT/TTS)
+  speech:
+    build: ./services/speech
+    ports:
+      - "8003:8003"
+    environment:
+      - STT_MODEL=whisper-large-v3
+      - STT_DEVICE=cuda
+      - TTS_PROVIDER=coqui
+    env_file: .env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./services/speech:/app
+      - speech_models:/app/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # LLM Service
+  llm:
+    build: ./services/llm
+    ports:
+      - "8004:8004"
+    environment:
+      - DEFAULT_PROVIDER=openai
+      - DEFAULT_MODEL=gpt-4
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    env_file: .env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./services/llm:/app
+      - llm_models:/app/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Evaluation & Reporting Service
+  evaluation-reporting:
+    build: ./services/evaluation-reporting
+    ports:
+      - "8005:8005"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/eval
+      - POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eval
+      - REDIS_URI=redis://redis:6379/0
+      - LLM_SERVICE_URL=http://llm:8004
+    env_file: .env
+    depends_on:
+      - mongodb
+      - postgres
+      - redis
+      - llm
+    volumes:
+      - ./services/evaluation-reporting:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_MULTIPLE_DATABASES: "interviews,eval"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d interviews"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: interviews
+    volumes:
+      - mongo_data:/data/db
+      - ./infra/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache & Message Broker
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  mongo_data:
+  redis_data:
+  speech_models:
+  llm_models:
+
+networks:
+  default:
+    name: ia-interviews-network
+    driver: bridge
