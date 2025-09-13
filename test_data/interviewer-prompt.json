@@ -178,4 +178,5 @@
       "feedbackMechanism": "Performance can be evaluated by human reviewers who compare the generated summaries and confidence scores against the original interview transcripts. Feedback should focus on the quality, accuracy, and completeness of the summaries. [cite: 84, 146]",
       "adaptationProcess": "The persona's core `operationalWorkflow`, `behavioralRestrictionList`, and `stylisticGuide` can be updated based on performance analysis. For example, if summaries consistently miss a certain type of information, the logic for follow-up questions can be refined. This ensures the persona evolves and improves over time. [cite: 85, 29, 160]"
     }
+  }
 }
