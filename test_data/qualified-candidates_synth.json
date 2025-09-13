@@ -1,0 +1,430 @@
+[
+  {
+    "candidateFor": "Junior Graphic Designer",
+    "cv": {
+      "personalDetails": {
+        "name": "Anya Sharma",
+        "location": "Baltimore, MD",
+        "email": "anya.sharma.design@email.com",
+        "phone": "555-0211",
+        "linkedin": "linkedin.com/in/anyasharmadesign"
+      },
+      "summary": "A creative and detail-oriented recent graduate with a BFA in Graphic Design and a strong portfolio focused on branding and digital media. Passionate about typography and visual storytelling, seeking to apply skills in a dynamic team environment to produce compelling design solutions.",
+      "experience": [
+        {
+          "title": "Graphic Design Intern",
+          "company": "Bright Ideas Agency",
+          "dates": "May 2024 - August 2024",
+          "responsibilities": [
+            "Assisted senior designers in creating social media assets for 5+ clients, contributing to a 15% average increase in post engagement.",
+            "Designed promotional flyers and brochures for local events, adhering to strict brand guidelines.",
+            "Participated in weekly brainstorming sessions and contributed to mood board creation for a major CPG client's rebranding project."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Bachelor of Fine Arts in Graphic Design",
+          "university": "Maryland Institute College of Art",
+          "dates": "2021 - 2025",
+          "notes": "Graduated Magna Cum Laude, GPA: 3.8/4.0. Dean's List all semesters."
+        }
+      ],
+      "skills": [
+        "Adobe Photoshop",
+        "Adobe Illustrator",
+        "Adobe InDesign",
+        "Figma",
+        "Typography & Layout",
+        "Branding Identity",
+        "Digital Illustration"
+      ],
+      "portfolio": "www.anyasharmadesigns.com",
+      "interests": "Urban photography, printmaking, visiting art museums, collecting vintage posters."
+    }
+  },
+  {
+    "candidateFor": "Senior Software Engineer",
+    "cv": {
+      "personalDetails": {
+        "name": "Kenji Tanaka",
+        "location": "Seattle, WA",
+        "email": "kenji.tanaka.dev@email.com",
+        "phone": "555-0212",
+        "linkedin": "linkedin.com/in/kenjitanakadev",
+        "github": "github.com/ktanaka"
+      },
+      "summary": "Results-driven Senior Software Engineer with 8+ years of experience architecting, developing, and deploying scalable distributed systems on AWS. Proven leader with a track record of mentoring engineering teams and improving system performance and reliability. Seeking to tackle complex technical challenges in a product-focused role.",
+      "experience": [
+        {
+          "title": "Senior Software Engineer",
+          "company": "TechSolutions Inc.",
+          "dates": "June 2019 - Present",
+          "responsibilities": [
+            "Led the greenfield design and development of a new microservices-based platform, improving system reliability by 40% and cutting infrastructure costs by 20%.",
+            "Mentored and coached a team of 4 junior engineers, leading code reviews and establishing best practices for testing and documentation.",
+            "Reduced average API response time from 800ms to 250ms by optimizing SQL queries and implementing a Redis caching layer.",
+            "Owned and maintained CI/CD pipelines using Jenkins, Docker, and Kubernetes."
+          ]
+        },
+        {
+          "title": "Software Engineer II",
+          "company": "DataStream Corp.",
+          "dates": "July 2016 - June 2019",
+          "responsibilities": [
+            "Developed and maintained core backend services for a high-traffic data analytics platform processing over 1M events per minute.",
+            "Collaborated with product managers to define technical requirements and implement new features.",
+            "Increased test coverage from 60% to 90% for key services."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Bachelor of Science in Computer Science",
+          "university": "Carnegie Mellon University",
+          "dates": "2012 - 2016"
+        }
+      ],
+      "skills": [
+        "Java", "Python", "Go", "Spring Boot", "Django", "PostgreSQL", "MongoDB", "Redis", "AWS (EC2, S3, Lambda, SQS)", "Docker", "Kubernetes", "Microservices Architecture", "Agile/Scrum"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Marketing Manager",
+    "cv": {
+      "personalDetails": {
+        "name": "Fatima Al-Jamil",
+        "location": "Chicago, IL",
+        "email": "f.aljamil@email.com",
+        "phone": "555-0213",
+        "linkedin": "linkedin.com/in/fatimaaljamil"
+      },
+      "summary": "A strategic and ROI-focused Marketing Manager with 6 years of experience leading multi-channel campaigns that drive revenue growth. Expertise in bridging the gap between marketing and sales through effective lead generation, nurturing, and data analysis. Proficient in HubSpot, Salesforce, and Google Analytics.",
+      "experience": [
+        {
+          "title": "Marketing Manager",
+          "company": "Innovate Digital",
+          "dates": "March 2021 - Present",
+          "responsibilities": [
+            "Orchestrated a content marketing strategy that boosted organic website traffic by 50% YoY and generated over $1.2M in attributable pipeline.",
+            "Managed and mentored a team of 3 marketing specialists, resulting in a 15% increase in team-generated MQLs.",
+            "Oversaw a $200,000 annual marketing budget, optimizing spend to decrease cost-per-acquisition by 18%.",
+            "Built and refined lead nurturing workflows in HubSpot that improved lead-to-customer conversion rates by 25%."
+          ]
+        },
+        {
+          "title": "Digital Marketing Specialist",
+          "company": "MarketGrowth Co.",
+          "dates": "August 2018 - March 2021",
+          "responsibilities": [
+            "Executed end-to-end email marketing campaigns and managed corporate social media channels.",
+            "Analyzed campaign performance and delivered monthly reports to leadership."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Bachelor of Business Administration, Marketing Concentration",
+          "university": "University of Michigan",
+          "dates": "2014 - 2018"
+        }
+      ],
+      "skills": [
+        "Digital Strategy", "Content Marketing", "SEO/SEM", "Marketing Automation (HubSpot)", "CRM (Salesforce)", "Google Analytics", "Budget Management", "Lead Generation", "Cross-Functional Collaboration"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Human Resources Generalist",
+    "cv": {
+      "personalDetails": {
+        "name": "Marcus Thorne",
+        "location": "Atlanta, GA",
+        "email": "marcus.thorne.hr@email.com",
+        "phone": "555-0214",
+        "linkedin": "linkedin.com/in/marcusthornehr"
+      },
+      "summary": "A people-first, SHRM-CP certified HR Generalist with 4 years of comprehensive experience in fast-paced tech environments. Adept at handling sensitive employee relations, managing full-cycle recruitment, and driving initiatives that enhance company culture and retention.",
+      "experience": [
+        {
+          "title": "HR Generalist",
+          "company": "Strive Corp.",
+          "dates": "July 2020 - Present",
+          "responsibilities": [
+            "Managed full-cycle recruitment for technical and non-technical roles, successfully filling over 50 positions and reducing time-to-hire by 10 days.",
+            "Acted as the primary point of contact for employee relations, conducting thorough investigations and mediating conflicts to resolution.",
+            "Administered benefits programs and led the annual open enrollment process for 200+ employees.",
+            "Revamped the new hire orientation program, improving 90-day new hire satisfaction scores by 20%."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Bachelor of Science in Human Resource Management",
+          "university": "Penn State University",
+          "dates": "2016 - 2020"
+        }
+      ],
+      "certifications": [
+        "SHRM Certified Professional (SHRM-CP)"
+      ],
+      "skills": [
+        "Employee Relations", "Full-Cycle Recruiting", "Benefits Administration", "Onboarding & Training", "Employment Law (FMLA, ADA)", "HRIS (Workday)", "Conflict Resolution", "Policy Development"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Customer Support Representative",
+    "cv": {
+      "personalDetails": {
+        "name": "Brenda O'Malley",
+        "location": "Phoenix, AZ",
+        "email": "brenda.omalley@email.com",
+        "phone": "555-0215",
+        "linkedin": "linkedin.com/in/brendaomalley"
+      },
+      "summary": "A dedicated and empathetic Customer Support professional with 2 years of experience providing Tier 1 & 2 support in a high-volume SaaS call center. Proven ability to de-escalate difficult situations and resolve complex issues efficiently, consistently exceeding satisfaction benchmarks.",
+      "experience": [
+        {
+          "title": "Customer Service Agent",
+          "company": "ConnectUs Solutions",
+          "dates": "October 2022 - Present",
+          "responsibilities": [
+            "Handled 60-80 inbound customer inquiries daily via phone, email, and live chat.",
+            "Maintained a 95% customer satisfaction (CSAT) score, exceeding the team average of 90%.",
+            "Resolved 80% of issues on the first contact and maintained an average first-response time of under 2 hours.",
+            "Documented all customer interactions meticulously in Zendesk."
+          ]
+        }
+      ],
+      "awards": [
+        "Employee of the Month (Q2 2023)"
+      ],
+      "education": [
+        {
+          "degree": "Associate of Arts in Communications",
+          "university": "Community College of Baltimore County",
+          "dates": "2020 - 2022"
+        }
+      ],
+      "skills": [
+        "Customer Service", "Technical Troubleshooting", "De-escalation", "Empathetic Communication", "Zendesk", "Intercom", "Problem Solving", "Time Management"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Data Analyst",
+    "cv": {
+      "personalDetails": {
+        "name": "Priya Singh",
+        "location": "Austin, TX",
+        "email": "priya.singh.data@email.com",
+        "phone": "555-0216",
+        "linkedin": "linkedin.com/in/priyasinghdata"
+      },
+      "summary": "An analytical and detail-oriented Data Analyst with 3 years of experience transforming raw data into actionable business intelligence. Expertise in data cleaning, querying, and creating intuitive visualizations that empower stakeholders to make informed decisions.",
+      "experience": [
+        {
+          "title": "Data Analyst",
+          "company": "MetricsFirst",
+          "dates": "June 2021 - Present",
+          "responsibilities": [
+            "Designed and maintained interactive dashboards in Tableau to monitor KPIs for the sales and marketing departments, providing real-time insights.",
+            "Wrote and optimized complex SQL queries to perform ETL tasks on large datasets.",
+            "Conducted an in-depth customer segmentation analysis that directly informed the company's successful Q3 marketing strategy.",
+            "Presented analytical findings to non-technical stakeholders in a clear and compelling manner."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Bachelor of Science in Statistics",
+          "university": "University of Texas at Austin",
+          "dates": "2017 - 2021"
+        }
+      ],
+      "skills": {
+        "Languages": ["SQL", "Python (Pandas, NumPy, Matplotlib)"],
+        "Visualization": ["Tableau", "Power BI"],
+        "Databases": ["PostgreSQL", "SQL Server"],
+        "Other": ["Microsoft Excel", "Statistical Analysis", "ETL Processes", "Data Cleaning"]
+      }
+    }
+  },
+  {
+    "candidateFor": "Product Manager",
+    "cv": {
+      "personalDetails": {
+        "name": "Damian Kowalski",
+        "location": "San Francisco, CA",
+        "email": "damian.k.pm@email.com",
+        "phone": "555-0217",
+        "linkedin": "linkedin.com/in/damiankowalskipm"
+      },
+      "summary": "A user-centric Product Manager with 7 years of experience owning the product lifecycle from discovery to launch in the B2B SaaS space. A strategic thinker who excels at defining product vision, prioritizing roadmaps, and leading cross-functional teams to ship features that deliver both user and business value.",
+      "experience": [
+        {
+          "title": "Product Manager",
+          "company": "CloudWare Solutions",
+          "dates": "April 2019 - Present",
+          "responsibilities": [
+            "Owned the product lifecycle for the 'Collaboration Suite' SaaS product, growing the user base by 30% and increasing user engagement by 15%.",
+            "Conducted over 50 user interviews and usability tests to gather insights and validate hypotheses.",
+            "Defined and managed the product roadmap, balancing new features, technical debt, and customer requests.",
+            "Authored PRDs and user stories, and managed the product backlog in Jira for a team of 8 engineers."
+          ]
+        },
+        {
+          "title": "Associate Product Manager",
+          "company": "StartUp Labs",
+          "dates": "May 2017 - April 2019",
+          "responsibilities": [
+            "Supported senior PMs with market research, competitive analysis, and data gathering.",
+            "Assisted in managing the product backlog and sprint planning ceremonies."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Bachelor of Science in Information Systems",
+          "university": "New York University",
+          "dates": "2013 - 2017"
+        }
+      ],
+      "skills": [
+        "Product Management", "Agile/Scrum", "Roadmap Prioritization", "User Research & Testing", "Data Analysis", "Jira", "Stakeholder Management", "Go-to-Market Strategy"
+      ],
+      "interests": "Following tech trends, beta testing new apps, long-distance running."
+    }
+  },
+  {
+    "candidateFor": "Sales Development Representative",
+    "cv": {
+      "personalDetails": {
+        "name": "Javier Morales",
+        "location": "Denver, CO",
+        "email": "javi.morales@email.com",
+        "phone": "555-0218",
+        "linkedin": "linkedin.com/in/javiermoralessales"
+      },
+      "summary": "A driven and ambitious recent graduate with a passion for building relationships and exceeding targets. Eager to apply strong communication skills and a competitive spirit to a Sales Development role, with a focus on generating high-quality leads and contributing to revenue growth.",
+      "experience": [
+        {
+          "title": "Sales Intern",
+          "company": "NextGen Sales",
+          "dates": "June 2024 - August 2024",
+          "responsibilities": [
+            "Sourced and qualified over 50 new leads for the enterprise sales team through cold calling and email outreach.",
+            "Shadowed senior account executives on discovery calls and product demos.",
+            "Maintained and updated lead/contact information in Salesforce."
+          ]
+        },
+        {
+          "title": "Server",
+          "company": "The Downtown Grill",
+          "dates": "2022 - 2024",
+          "responsibilities": [
+            "Provided excellent customer service in a high-pressure, fast-paced environment.",
+            "Consistently ranked in the top 10% of staff for upselling specials and desserts."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Bachelor of Arts in Business Administration",
+          "university": "University of Central Florida",
+          "dates": "2021 - 2025",
+          "notes": "Member of the University Sales Club and intramural soccer team."
+        }
+      ],
+      "skills": [
+        "Communication & Persuasion", "Resilience & Coachability", "Goal-Oriented", "CRM (Salesforce)", "Lead Prospecting", "Time Management", "Active Listening"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Content Writer",
+    "cv": {
+      "personalDetails": {
+        "name": "Simone Dubois",
+        "location": "New York, NY",
+        "email": "simone.dubois.writes@email.com",
+        "phone": "555-0219",
+        "linkedin": "linkedin.com/in/simoneduboiswrites"
+      },
+      "summary": "A versatile Content Writer with 3 years of experience creating engaging, SEO-optimized content for B2B SaaS and FinTech companies. Adept at translating complex topics into clear, compelling narratives across various formats, including blog posts, white papers, and case studies.",
+      "experience": [
+        {
+          "title": "Content Writer",
+          "company": "Content Crafters",
+          "dates": "July 2021 - Present",
+          "responsibilities": [
+            "Wrote and published 4-5 long-form blog posts per week, resulting in a 40% increase in organic traffic.",
+            "Authored a white paper on AI in finance that generated over 500 marketing qualified leads (MQLs).",
+            "Managed the company's LinkedIn and Twitter accounts, growing follower count by 20%.",
+            "Collaborated with subject matter experts to ensure technical accuracy."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Bachelor of Arts in Journalism",
+          "university": "University of Missouri",
+          "dates": "2017 - 2021"
+        }
+      ],
+      "skills": {
+        "Writing": ["Long-form Articles", "Copywriting", "SEO Writing", "Editing & Proofreading", "Storytelling"],
+        "Tools": ["WordPress", "Ahrefs", "SEMrush", "Google Analytics"]
+      },
+      "portfolio": "www.simoneduboiswrites.com"
+    }
+  },
+  {
+    "candidateFor": "Office Manager",
+    "cv": {
+      "personalDetails": {
+        "name": "Trevor Vance",
+        "location": "Boston, MA",
+        "email": "trevor.vance@email.com",
+        "phone": "555-0220",
+        "linkedin": "linkedin.com/in/trevorvance"
+      },
+      "summary": "A proactive and resourceful Office Manager with over 5 years of experience creating efficient and welcoming office environments. Proven ability to manage budgets, negotiate with vendors, and support executive teams. A master of multitasking, dedicated to ensuring seamless daily operations.",
+      "experience": [
+        {
+          "title": "Office Manager",
+          "company": "Solutions Group",
+          "dates": "May 2019 - Present",
+          "responsibilities": [
+            "Managed all aspects of office administration for a 75-person office, including supplies, equipment, and facilities.",
+            "Renegotiated vendor contracts for office supplies and cleaning services, achieving an annual cost saving of 12%.",
+            "Planned and executed all company events, including holiday parties, summer outings, and team-building activities, while staying under budget.",
+            "Provided direct administrative support to the CEO and CTO."
+          ]
+        },
+        {
+          "title": "Administrative Assistant",
+          "company": "Global Corp.",
+          "dates": "June 2017 - May 2019",
+          "responsibilities": [
+            "Managed complex calendars and arranged international travel for senior leadership.",
+            "Processed expense reports and handled front desk responsibilities."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Associate of Science in Business Administration",
+          "university": "Northern Virginia Community College",
+          "dates": "2015 - 2017"
+        }
+      ],
+      "skills": [
+        "Office Administration", "Vendor Management", "Event Planning", "Budgeting & Expense Reporting", "Microsoft Office Suite", "Google Suite", "Expensify", "Excellent Communication", "Problem Solving"
+      ]
+    }
+  }
+]
+
