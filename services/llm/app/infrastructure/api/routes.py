@@ -1,41 +1,57 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List
-from .models import PromptCreate, PromptResponse
-from ...application.use_cases.prompt_use_cases import PromptUseCases
-from ..persistence.mongodb.prompt_repository import MongoDBPromptRepository
-from ..config import Settings
+from typing import Annotated
+
+from ...domain.models import GenerateRequest, GenerateResponse
+from ...application.use_cases import GenerateTextUseCase
+from ..llm_provider import MockLLMProvider
+
 
 router = APIRouter(prefix="/api/v1")
-settings = Settings()
 
-def get_use_cases() -> PromptUseCases:
-    repository = MongoDBPromptRepository()
-    return PromptUseCases(repository)
 
-@router.get("/healthz")
-def health_check():
-    return {"status": "ok", "service": "llm"}
+def get_llm_provider() -> MockLLMProvider:
+    """Dependency injection para proveedor LLM"""
+    return MockLLMProvider()
 
-@router.post("/prompts", response_model=PromptResponse)
-async def create_prompt(
-    prompt: PromptCreate,
-    use_cases: PromptUseCases = Depends(get_use_cases)
+
+def get_generate_use_case(
+    llm_provider: Annotated[MockLLMProvider, Depends(get_llm_provider)]
+) -> GenerateTextUseCase:
+    """Dependency injection para caso de uso de generación"""
+    return GenerateTextUseCase(llm_provider)
+
+
+@router.post("/generate", response_model=GenerateResponse)
+async def generate_text(
+    request: GenerateRequest,
+    use_case: Annotated[GenerateTextUseCase, Depends(get_generate_use_case)]
 ):
-    return await use_cases.create_prompt(
-        template=prompt.template,
-        parameters=prompt.parameters,
-        model=prompt.model or settings.DEFAULT_MODEL,
-        max_tokens=prompt.max_tokens or settings.DEFAULT_MAX_TOKENS,
-        temperature=prompt.temperature or settings.DEFAULT_TEMPERATURE
-    )
+    """Endpoint para generar texto usando LLM"""
+    try:
+        return await use_case.execute(request)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Internal LLM service error: {str(e)}"
+        )
 
-@router.get("/prompts/{prompt_id}", response_model=PromptResponse)
-async def get_prompt(prompt_id: str, use_cases: PromptUseCases = Depends(get_use_cases)):
-    prompt = await use_cases.get_prompt(prompt_id)
-    if not prompt:
-        raise HTTPException(status_code=404, detail="Prompt not found")
-    return prompt
 
-@router.get("/prompts", response_model=List[PromptResponse])
-async def list_prompts(use_cases: PromptUseCases = Depends(get_use_cases)):
-    return await use_cases.list_prompts()
+@router.get("/models")
+async def list_models(
+    llm_provider: Annotated[MockLLMProvider, Depends(get_llm_provider)]
+):
+    """Lista los modelos disponibles"""
+    from ...domain.models import ModelType
+    
+    models = []
+    for model_type in ModelType:
+        model_info = llm_provider.get_model_info(model_type)
+        models.append({
+            "id": model_type.value,
+            "name": model_info.get("name", model_type.value),
+            "provider": model_info.get("provider", "Unknown"),
+            "max_tokens": model_info.get("max_tokens", 0),
+            "context_window": model_info.get("context_window", 0)
+        })
+    
+    return {"models": models}
