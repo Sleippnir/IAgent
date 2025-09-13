@@ -1,0 +1,354 @@
+[
+  {
+    "candidateFor": "Junior Graphic Designer",
+    "cv": {
+      "personalDetails": {
+        "name": "Bob Vance",
+        "location": "Scranton, PA",
+        "email": "bob.vance.refrigeration@email.com",
+        "phone": "555-0321"
+      },
+      "summary": "Hard-working and reliable professional with over 15 years of experience in the refrigeration industry. Looking for a change of pace and to try something more creative. Quick learner and good with my hands.",
+      "experience": [
+        {
+          "title": "Owner/Operator",
+          "company": "Vance Refrigeration",
+          "dates": "2008 - Present",
+          "responsibilities": [
+            "Managed all sales and operations for a commercial refrigeration business.",
+            "Installed and serviced industrial cooling units.",
+            "Handled customer billing and vendor relationships."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "HVAC Certification",
+          "university": "Scranton Technical College",
+          "dates": "2007"
+        }
+      ],
+      "skills": [
+        "Microsoft Word",
+        "QuickBooks",
+        "Sales",
+        "Customer Service",
+        "Mechanical Repair"
+      ],
+      "interests": "Woodworking, fixing old cars, watching football."
+    }
+  },
+  {
+    "candidateFor": "Senior Software Engineer",
+    "cv": {
+      "personalDetails": {
+        "name": "Gladys Knight",
+        "location": "Boise, ID",
+        "email": "gladys.k@email.com",
+        "phone": "555-0322",
+        "linkedin": "linkedin.com/in/gladysknight"
+      },
+      "summary": "Experienced IT professional with a background in providing excellent desktop support. Skilled in troubleshooting hardware and software issues for end-users. Familiar with basic HTML from a class taken in 1998. Eager to take on a bigger role in software creation.",
+      "experience": [
+        {
+          "title": "Help Desk Technician",
+          "company": "Boise Regional Hospital",
+          "dates": "2005 - Present",
+          "responsibilities": [
+            "Provided Tier 1 technical support to hospital staff.",
+            "Installed software and set up new employee computers.",
+            "Reset passwords and managed user accounts in Active Directory.",
+            "Wrote documentation for common IT issues."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Associate of Applied Science, IT Support",
+          "university": "Idaho Community College",
+          "dates": "2003 - 2005"
+        }
+      ],
+      "skills": [
+        "Windows OS", "Active Directory", "Hardware Troubleshooting", "Customer Service", "Microsoft Office", "Basic HTML"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Marketing Manager",
+    "cv": {
+      "personalDetails": {
+        "name": "Chad Peterson",
+        "location": "Miami, FL",
+        "email": "chad.p.fit@email.com",
+        "phone": "555-0323",
+        "linkedin": "linkedin.com/in/chadpeterson"
+      },
+      "summary": "Highly motivated and energetic professional with 5 years of experience as a personal trainer. Great at motivating people to achieve their goals. Looking to apply my skills in a corporate setting. I post on Instagram a lot, so I have marketing experience.",
+      "experience": [
+        {
+          "title": "Head Personal Trainer",
+          "company": "Golds Gym",
+          "dates": "2020 - Present",
+          "responsibilities": [
+            "Developed personalized fitness plans for over 50 clients.",
+            "Led group fitness classes and boot camps.",
+            "Promoted my services via social media to attract new clients.",
+            "Managed client scheduling and payments."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Personal Trainer Certification",
+          "university": "ACE Fitness",
+          "dates": "2020"
+        }
+      ],
+      "skills": [
+        "Fitness & Nutrition", "Motivation", "Sales", "Customer Relations", "Instagram", "Scheduling"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Human Resources Generalist",
+    "cv": {
+      "personalDetails": {
+        "name": "Penelope Garcia",
+        "location": "Quantico, VA",
+        "email": "penelope.g@email.com",
+        "phone": "555-0324",
+        "linkedin": "linkedin.com/in/penelopegarcia"
+      },
+      "summary": "Detail-oriented administrative professional with a knack for organizing information and making offices a brighter place. I enjoy helping people and believe in the importance of following rules. Looking for a role where I can support a team and keep things running smoothly.",
+      "experience": [
+        {
+          "title": "Receptionist",
+          "company": "FBI Behavioral Analysis Unit",
+          "dates": "2015 - Present",
+          "responsibilities": [
+            "Answered and directed all incoming phone calls.",
+            "Greeted visitors and managed building access.",
+            "Sorted and distributed mail.",
+            "Booked conference rooms and maintained office supply inventory."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "High School Diploma",
+          "university": "Quantico High School",
+          "dates": "2014"
+        }
+      ],
+      "skills": [
+        "Multi-line Phone Systems", "Data Entry", "Microsoft Office", "Scheduling", "Friendly Demeanor", "Organization"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Customer Support Representative",
+    "cv": {
+      "personalDetails": {
+        "name": "Daria Morgendorffer",
+        "location": "Lawndale, USA",
+        "email": "daria.m@email.com",
+        "phone": "555-0325"
+      },
+      "summary": "Observant and analytical individual seeking a quiet role with minimal human interaction. I excel at independent work and prefer tasks that are predictable and straightforward. I'm looking for a stable job to fund my personal interests.",
+      "experience": [
+        {
+          "title": "Overnight Stocker",
+          "company": "Costco",
+          "dates": "2022 - Present",
+          "responsibilities": [
+            "Unloaded trucks and stocked shelves during non-business hours.",
+            "Organized backroom inventory.",
+            "Operated a forklift and pallet jack.",
+            "Ensured the store was ready for opening."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "High School Diploma",
+          "university": "Lawndale High",
+          "dates": "2021"
+        }
+      ],
+      "skills": [
+        "Inventory Management", "Forklift Operation", "Efficiency", "Works well alone", "Punctual"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Data Analyst",
+    "cv": {
+      "personalDetails": {
+        "name": "Phoebe Buffay",
+        "location": "New York, NY",
+        "email": "phoebe.b.music@email.com",
+        "phone": "555-0326",
+        "linkedin": "linkedin.com/in/phoebemusic"
+      },
+      "summary": "A creative and intuitive professional with a background in massage therapy and music. I'm a people person and good at reading auras. I'm interested in working with numbers because they have their own kind of energy. I have used Microsoft Excel to make lists.",
+      "experience": [
+        {
+          "title": "Freelance Musician",
+          "company": "Self-Employed",
+          "dates": "2010 - Present",
+          "responsibilities": [
+            "Wrote and performed original songs at various coffee shops.",
+            "Booked my own gigs and managed my schedule.",
+            "Taught guitar lessons to beginners."
+          ]
+        },
+        {
+          "title": "Massage Therapist",
+          "company": "Various Spas",
+          "dates": "2012 - 2020",
+          "responsibilities": [
+            "Provided therapeutic massage services to a diverse client base."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Massage Therapy License",
+          "university": "New York College of Health Professions",
+          "dates": "2012"
+        }
+      ],
+      "skills": [
+        "Guitar", "Songwriting", "Massage Therapy", "Customer Service", "Microsoft Excel (Beginner)", "Creative Thinking"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Product Manager",
+    "cv": {
+      "personalDetails": {
+        "name": "Michael Scott",
+        "location": "Scranton, PA",
+        "email": "m.scott.dundermifflin@email.com",
+        "phone": "555-0327",
+        "linkedin": "linkedin.com/in/michaelscott"
+      },
+      "summary": "World's Best Boss with over a decade of experience in paper sales and management. I'm a big ideas person and love to brainstorm. Looking for a role where I can come up with new product ideas and have a team build them for me. I'm great at managing people and making the workplace fun.",
+      "experience": [
+        {
+          "title": "Regional Manager",
+          "company": "Dunder Mifflin Paper Company",
+          "dates": "2001 - 2011",
+          "responsibilities": [
+            "Managed the Scranton branch and led a team of salespeople.",
+            "Hosted the annual Dundie Awards to boost morale.",
+            "Consistently met and exceeded sales targets (sometimes).",
+            "Came up with creative ideas like 'Tube City'."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Some College",
+          "university": "University of Scranton"
+        }
+      ],
+      "skills": [
+        "Sales", "Motivation", "Public Speaking", "Improvisation", "Event Planning", "Microsoft PowerPoint"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Sales Development Representative",
+    "cv": {
+      "personalDetails": {
+        "name": "Angela Martin",
+        "location": "Scranton, PA",
+        "email": "angela.martin.acct@email.com",
+        "phone": "555-0328",
+        "linkedin": "linkedin.com/in/angelamartin"
+      },
+      "summary": "A meticulous and highly organized accountant with a strong focus on accuracy and procedure. I prefer working independently in a quiet environment. I am seeking a stable position where I can apply my skills in a structured and predictable manner.",
+      "experience": [
+        {
+          "title": "Head of Accounting",
+          "company": "Dunder Mifflin Paper Company",
+          "dates": "1999 - Present",
+          "responsibilities": [
+            "Managed accounts payable and receivable.",
+            "Prepared financial statements and reports for corporate.",
+            "Ensured strict adherence to company financial policies.",
+            "Chaired the Party Planning Committee (with an iron fist)."
+          ]
+        }
+      ],
+      "skills": [
+        "Accounting", "Financial Reporting", "Microsoft Excel", "Attention to Detail", "Organization", "Following Rules"
+      ],
+      "interests": "Cats, proper office etiquette, judging others."
+    }
+  },
+  {
+    "candidateFor": "Content Writer",
+    "cv": {
+      "personalDetails": {
+        "name": "Kevin Malone",
+        "location": "Scranton, PA",
+        "email": "kevin.m@email.com",
+        "phone": "555-0329"
+      },
+      "summary": "I am looking for a new job. I am good at talking to people and have experience in an office. I can write emails and memos. My last job was in accounting. I am a hard worker and want to do a good job for your company.",
+      "experience": [
+        {
+          "title": "Accountant",
+          "company": "Dunder Mifflin Paper Company",
+          "dates": "2002 - 2013",
+          "responsibilities": [
+            "Handled some accounting tasks.",
+            "Answered the phone sometimes.",
+            "Helped with office parties."
+          ]
+        }
+      ],
+      "education": [
+        {
+          "degree": "Some College",
+          "university": "Local Community College"
+        }
+      ],
+      "skills": [
+        "Math", "Talking", "Microsoft Word", "Friendly"
+      ]
+    }
+  },
+  {
+    "candidateFor": "Office Manager",
+    "cv": {
+      "personalDetails": {
+        "name": "Gordon Ramsay",
+        "location": "Los Angeles, CA",
+        "email": "g.ramsay.chef@email.com",
+        "phone": "555-0330",
+        "linkedin": "linkedin.com/in/gordonramsay"
+      },
+      "summary": "World-renowned chef and restaurateur with decades of experience running high-pressure kitchens. Expert in efficiency, quality control, and team leadership. Looking to bring my intense focus and high standards to a corporate office environment. I can make this office run like a Michelin-starred kitchen.",
+      "experience": [
+        {
+          "title": "Chef & Owner",
+          "company": "Various Michelin Star Restaurants",
+          "dates": "1998 - Present",
+          "responsibilities": [
+            "Designed menus and oversaw all kitchen operations.",
+            "Managed a large team of chefs and kitchen staff.",
+            "Ensured the highest standards of food quality and presentation.",
+            "Managed inventory, vendors, and budgets to maximize profitability."
+          ]
+        }
+      ],
+      "skills": [
+        "Culinary Arts", "Kitchen Management", "Team Leadership", "Budgeting", "Vendor Negotiation", "Yelling", "Quality Control"
+      ]
+    }
+  }
+]
