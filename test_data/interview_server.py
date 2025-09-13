@@ -10,12 +10,13 @@ app = FastAPI(title="Interview Orchestrator (Option C)")
 # In-memory demo storage
 # -------------------------
 DB = {
-    "sessions": {},            # session_id -> Session
-    "questions": {},           # role_id -> list[Question] sorted by order_index
-    "transcript": {},          # (session_id, question_id) -> list[Turn]
-    "summaries": {},           # session_id -> list[QuestionSummary]
-    "pinned_context": {},      # session_id -> PinnedContext
-    "rubrics": {},             # session_id -> Rubric text
+    "sessions": {},          # session_id -> Session
+    "questions": {},         # role_id -> list[Question] sorted by order_index
+    "transcript": {},        # (session_id, question_id) -> list[Turn]
+    "archived_transcripts": {}, # (session_id, question_id) -> list[Turn]
+    "summaries": {},         # session_id -> list[QuestionSummary]
+    "pinned_context": {},    # session_id -> PinnedContext
+    "rubrics": {},           # session_id -> Rubric text
 }
 
 # -------------------------
@@ -296,6 +297,11 @@ def mark_question_answered_or_skipped(sess: Session, outcome: Literal["answered"
 
     DB["summaries"][sess.session_id].append(summary)
 
+    # Archive the full raw transcript before clearing it from the active pool.
+    key = transcript_key(sess.session_id, q.question_id)
+    if key in DB["transcript"]:
+        DB["archived_transcripts"][key] = DB["transcript"][key]
+
     # finalize: clear transcript and advance pointer
     clear_transcript(sess.session_id, q.question_id)
     sess.current_index += 1
@@ -411,12 +417,11 @@ def kickoff_scoring(session_id: str):
 
     role_id = sess.role_id
     questions = get_questions(role_id)
-    # Gather FULL raw transcripts per question from archive; this demo keeps only the last active in memory.
-    # In production, you would have archived ALL raw turns before clearing. Here, we pack summaries + whatever is left.
+    
+    # Gather FULL raw transcripts from the archive.
     transcripts: Dict[str, List[dict]] = {}
-    # This demo will include only any remaining (should be none) raw transcripts:
     transcripts.update({
-        q.question_id: [t.dict() for t in DB["transcript"].get(transcript_key(session_id, q.question_id), [])]
+        q.question_id: [t.dict() for t in DB["archived_transcripts"].get(transcript_key(session_id, q.question_id), [])]
         for q in questions
     })
 
@@ -427,7 +432,7 @@ def kickoff_scoring(session_id: str):
         "rubric": DB["rubrics"].get(session_id, ""),
         "canonical_questions": [q.dict() for q in questions],
         "question_summaries": [s.dict() for s in DB["summaries"][session_id]],
-        "full_transcripts": transcripts,  # In production: ALL turns per question (pre-clear archived)
+        "full_transcripts": transcripts, # This now contains the complete, archived conversations
     }
 
     # TODO: send `payload` to your three reasoning models
