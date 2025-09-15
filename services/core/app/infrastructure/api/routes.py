@@ -25,6 +25,13 @@ async def get_interview(interview_id: str, use_cases: InterviewUseCases = Depend
         raise HTTPException(status_code=404, detail="Interview not found")
     return interview
 
+@router.get("/interviews/{interview_id}/role", response_model=str)
+async def get_role_for_interview(interview_id: str, use_cases: InterviewUseCases = Depends(get_use_cases)):
+    role_id = await use_cases.get_role_for_interview(interview_id)
+    if not role_id:
+        raise HTTPException(status_code=404, detail="Interview not found")
+    return role_id
+
 @router.get("/interviews", response_model=List[InterviewResponse])
 async def list_interviews(use_cases: InterviewUseCases = Depends(get_use_cases)):
     return await use_cases.list_interviews()

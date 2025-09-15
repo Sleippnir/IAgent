@@ -33,3 +33,9 @@ class InterviewUseCases:
                 interview.completed_at = datetime.now()
             return await self.repository.update(interview_id, interview)
         return None
+
+    async def get_role_for_interview(self, interview_id: str) -> Optional[str]:
+        interview = await self.repository.get(interview_id)
+        if interview:
+            return interview.position_id
+        return None
