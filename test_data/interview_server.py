@@ -115,7 +115,7 @@ Protocol for each canonical question:
    - If the candidate says "skip", confirm and proceed to summarize.
 4) When sufficiently answered OR skipped:
    - Produce a summary with:
-     • 3–6 bullets covering: example, scope (team/timeline/role), tools, metrics/outcomes, trade-offs/lessons.
+     • 3-6 bullets covering: example, scope (team/timeline/role), tools, metrics/outcomes, trade-offs/lessons.
      • up to 2 short evidence snippets (<= 30 words each).
      • confidence in [0.0, 1.0] for completeness/specificity.
    - Mark the question outcome and request the next question.
