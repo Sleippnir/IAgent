@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from app.routes.speech_routes import router as speech_router
+from app.api.context_management import router as context_router
 
 # Cargar variables de entorno
 load_dotenv()
@@ -56,6 +57,9 @@ app.add_middleware(
 
 # Incluir las rutas del servicio Speech
 app.include_router(speech_router)
+
+# Incluir las rutas de gestión de contexto
+app.include_router(context_router, prefix="/api/v1")
 
 if __name__ == "__main__":
     uvicorn.run(
