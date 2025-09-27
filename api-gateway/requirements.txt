@@ -1,24 +1,24 @@
 # Dependencias del API Gateway
 
 # Framework web principal
-fastapi==0.104.1
+fastapi>=0.104.1
 
 # Servidor ASGI para producción
-uvicorn[standard]==0.24.0
+uvicorn[standard]>=0.24.0
 
 # Cliente HTTP asíncrono para comunicación con microservicios
-httpx==0.25.2
+httpx>=0.25.2
 
 # Validación de datos y serialización
-pydantic==2.5.0
+pydantic>=2.5.0
 
 # Utilidades adicionales
-python-multipart==0.0.6  # Para manejo de formularios
-python-jose[cryptography]==3.3.0  # Para JWT (opcional)
-passlib[bcrypt]==1.7.4  # Para hashing de contraseñas (opcional)
+python-multipart>=0.0.6  # Para manejo de formularios
+python-jose[cryptography]>=3.3.0  # Para JWT (opcional)
+passlib[bcrypt]>=1.7.4  # Para hashing de contraseñas (opcional)
 
 # Logging y monitoreo
-structlog==23.2.0  # Logging estructurado (opcional)
+structlog>=23.2.0  # Logging estructurado (opcional)
 
 # Variables de entorno
-python-dotenv==1.0.0
+python-dotenv>=1.0.0
