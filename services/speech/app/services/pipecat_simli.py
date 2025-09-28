@@ -56,7 +56,7 @@ _shutdown_services_callback = None
 # instantiated. The function will be called when the desired transport gets
 # selected.
 def get_context_service():
-    """Obtiene la instancia del servicio de contexto."""
+    """Gets the context service instance."""
     global _interview_repository, _context_service
     
     if _context_service is None:
