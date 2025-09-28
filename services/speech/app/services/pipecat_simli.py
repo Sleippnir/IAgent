@@ -37,7 +37,7 @@ from pipecat.services.openai.llm import OpenAILLMService
 from pipecat.services.simli.video import SimliVideoService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.transports.daily.transport import DailyParams
-from pipecat.frames.frames import EndTaskFrame, TTSSpeakFrame
+from pipecat.frames.frames import EndFrame, EndTaskFrame, TTSSpeakFrame
 from pipecat.processors.frame_processor import FrameDirection
 from pipecat.services.llm_service import FunctionCallParams
 from pipecat.adapters.schemas.tools_schema import ToolsSchema
@@ -51,6 +51,7 @@ _interview_repository = None
 _context_service = None
 _qa_service = None
 TRANSCRIPT_BASE_DIR = Path("storage")
+_shutdown_services_callback = None
 # We store functions so objects (e.g. SileroVADAnalyzer) don't get
 # instantiated. The function will be called when the desired transport gets
 # selected.
@@ -81,6 +82,8 @@ async def end_conversation(params: FunctionCallParams):
     await params.llm.push_frame(EndTaskFrame(), FrameDirection.UPSTREAM)
     # Return a result object for the LLM (optional)
     await params.result_callback({"status": "ended"})
+    if _shutdown_services_callback is not None:
+        await _shutdown_services_callback()
 
 end_fn_schema = FunctionSchema(
     name="end_conversation",
@@ -163,6 +166,24 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     session_transcript_dir = TRANSCRIPT_BASE_DIR
     transcript_path = session_transcript_dir / f"session-{session_timestamp:%Y%m%dT%H%M%SZ}.md"
     transcript_initialized = False
+    services_shutdown = False
+
+    async def shutdown_services():
+        nonlocal services_shutdown
+        if services_shutdown:
+            return
+        services_shutdown = True
+        try:
+            await tts.stop(EndFrame())
+        except Exception:
+            logger.exception("Failed to stop ElevenLabs TTS service")
+        try:
+            await tts.cleanup()
+        except Exception:
+            logger.exception("Failed to clean up ElevenLabs TTS service")
+
+    global _shutdown_services_callback
+    _shutdown_services_callback = shutdown_services
 
     pipeline = Pipeline(
         [
@@ -198,6 +219,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     async def on_client_disconnected(transport, client):
         logger.info(f"Client disconnected")
         await task.cancel()
+        await shutdown_services()
 
     @transcript.event_handler("on_transcript_update")
     async def handle_transcript_update(processor, frame):
@@ -221,7 +243,12 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
             md_file.write("\n".join(lines) + "\n")
 
     runner = PipelineRunner(handle_sigint=runner_args.handle_sigint)
-    await runner.run(task)
+    try:
+        await runner.run(task)
+    finally:
+        await shutdown_services()
+        if _shutdown_services_callback is shutdown_services:
+            _shutdown_services_callback = None
 
 
 async def bot(runner_args: RunnerArguments):
