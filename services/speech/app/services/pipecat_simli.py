@@ -9,11 +9,11 @@ from .context_system_service import ContextService
 from ..infrastructure.repositories.questions_repository import QuestionsRepository
 from .qa_context_provider import QAContextProvider
 
-import os
-
 from dotenv import load_dotenv
 from loguru import logger
 from simli import SimliConfig
+from datetime import datetime
+from pathlib import Path
 
 from pipecat.services.google.stt import GoogleSTTService
 from pipecat.services.elevenlabs.tts import ElevenLabsTTSService  
@@ -42,6 +42,7 @@ from pipecat.processors.frame_processor import FrameDirection
 from pipecat.services.llm_service import FunctionCallParams
 from pipecat.adapters.schemas.tools_schema import ToolsSchema
 from pipecat.adapters.schemas.function_schema import FunctionSchema
+from pipecat.processors.transcript_processor import TranscriptProcessor
 
 
 load_dotenv(override=True)
@@ -49,6 +50,7 @@ load_dotenv(override=True)
 _interview_repository = None
 _context_service = None
 _qa_service = None
+TRANSCRIPT_BASE_DIR = Path("storage")
 # We store functions so objects (e.g. SileroVADAnalyzer) don't get
 # instantiated. The function will be called when the desired transport gets
 # selected.
@@ -70,6 +72,7 @@ def get_qa_service():
         _qa_service = QuestionsRepository()
     
     return _qa_service
+
 
 async def end_conversation(params: FunctionCallParams):
     # Optional: speak a goodbye
@@ -155,15 +158,23 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     context = LLMContext(messages, tools=tools)
     context_aggregator = LLMContextAggregatorPair(context)
 
+    transcript = TranscriptProcessor()
+    session_timestamp = datetime.utcnow()
+    session_transcript_dir = TRANSCRIPT_BASE_DIR
+    transcript_path = session_transcript_dir / f"session-{session_timestamp:%Y%m%dT%H%M%SZ}.md"
+    transcript_initialized = False
+
     pipeline = Pipeline(
         [
             transport.input(),
             stt,
+            transcript.user(),
             context_aggregator.user(),
             llm,
             tts,
             simli_ai,
             transport.output(),
+            transcript.assistant(), 
             context_aggregator.assistant(),
         ]
     )
@@ -187,6 +198,27 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     async def on_client_disconnected(transport, client):
         logger.info(f"Client disconnected")
         await task.cancel()
+
+    @transcript.event_handler("on_transcript_update")
+    async def handle_transcript_update(processor, frame):
+        nonlocal transcript_initialized
+        if not frame.messages:
+            return
+        if not transcript_initialized:
+            session_transcript_dir.mkdir(parents=True, exist_ok=True)
+            with transcript_path.open("w", encoding="utf-8") as md_file:
+                md_file.write(
+                    f"# Interview transcript ({session_timestamp:%Y-%m-%d %H:%M UTC})\n\n"
+                )
+            transcript_initialized = True
+        lines = []
+        for message in frame.messages:
+            role = message.role.capitalize()
+            timestamp = message.timestamp or datetime.utcnow().isoformat()
+            content = message.content.strip().replace("\n", "  \n")
+            lines.append(f"- **{timestamp} – {role}:** {content}")
+        with transcript_path.open("a", encoding="utf-8") as md_file:
+            md_file.write("\n".join(lines) + "\n")
 
     runner = PipelineRunner(handle_sigint=runner_args.handle_sigint)
     await runner.run(task)
