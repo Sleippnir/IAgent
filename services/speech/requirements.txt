@@ -61,3 +61,10 @@ loguru>=0.7.0
 
 # WebRTC implementation for real-time communication
 aiortc>=1.6.0
+pipecat[daily]
+pipecat-ai[silero]
+pipecat-ai[local-smart-turn-v3]
+pipecat-ai[webrtc]
+simli-ai
+pipecat-ai[cartesia]
+pipecat-ai[deepgram]
