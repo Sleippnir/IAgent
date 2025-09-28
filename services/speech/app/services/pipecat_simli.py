@@ -66,7 +66,7 @@ def get_context_service():
     return _context_service
 
 def get_qa_service():
-    """Obtiene la instancia del servicio de Q&A."""
+    """Gets the Q&A service instance."""
     global _qa_service
     
     if _qa_service is None:
