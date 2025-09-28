@@ -40,6 +40,9 @@ from pipecat.transports.daily.transport import DailyParams
 from pipecat.frames.frames import EndTaskFrame, TTSSpeakFrame
 from pipecat.processors.frame_processor import FrameDirection
 from pipecat.services.llm_service import FunctionCallParams
+from pipecat.adapters.schemas.tools_schema import ToolsSchema
+from pipecat.adapters.schemas.function_schema import FunctionSchema
+
 
 load_dotenv(override=True)
 
@@ -69,11 +72,21 @@ def get_qa_service():
     return _qa_service
 
 async def end_conversation(params: FunctionCallParams):
-    # Optional: say goodbye before closing
+    # Optional: speak a goodbye
     await params.llm.push_frame(TTSSpeakFrame("Okay, ending the session now."))
     # Push an EndTaskFrame upstream to terminate gracefully
     await params.llm.push_frame(EndTaskFrame(), FrameDirection.UPSTREAM)
+    # Return a result object for the LLM (optional)
+    await params.result_callback({"status": "ended"})
 
+end_fn_schema = FunctionSchema(
+    name="end_conversation",
+    description="End the current session and say goodbye",
+    properties={},
+    required=[]
+)
+
+tools = ToolsSchema(standard_tools=[end_fn_schema])
 # Register the tool with your LLM service
 
 
@@ -121,9 +134,12 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         model="gemini-2.5-flash",
     )
     
-    llm.register_function("end_conversation", end_conversation)
+    llm.register_function(
+        "end_conversation",
+        end_conversation,
+        cancel_on_interruption=True,
+    )
 
-    
 
     messages = [
         {
@@ -131,14 +147,12 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
             "content": (
                 "You are Kathia Slazar an AI agent performing structured job interviews over a WebRTC call. The current candidate (Marco Pantalone)is applying for a program manager position at the company Anyone AI. "
                 "You have access to a tool called `end_conversation` "
-                "When the user says goodbye or asks to end, you MUST call this tool "
-                "using the function calling interface, not by describing it in text. "
-                "Do not output '<call to ...>'. Instead, invoke the function directly."
+                "When the user says goodbye or asks to end, you MUST call this tool using the function calling interface, not by describing it in text."
             ),
         },
     ]
 
-    context = LLMContext(messages)
+    context = LLMContext(messages, tools=tools)
     context_aggregator = LLMContextAggregatorPair(context)
 
     pipeline = Pipeline(
