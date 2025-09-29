@@ -202,14 +202,15 @@ class TestLLMProviderFunctions:
     @patch('app.infrastructure.llm_provider.call_openai_gpt5')
     @patch('app.infrastructure.llm_provider.call_google_gemini')
     @patch('app.infrastructure.llm_provider.call_openrouter_deepseek')
-    def test_run_evaluations(self, mock_deepseek, mock_gemini, mock_openai, sample_interview):
+    @pytest.mark.asyncio
+    async def test_run_evaluations(self, mock_deepseek, mock_gemini, mock_openai, sample_interview):
         """Test running evaluations on interview"""
-        # Setup mocks - run_evaluations calls the functions directly, not as async
+        # Setup mocks for async functions
         mock_openai.return_value = "OpenAI evaluation result"
         mock_gemini.return_value = "Gemini evaluation result" 
         mock_deepseek.return_value = "DeepSeek evaluation result"
 
-        result = run_evaluations(sample_interview)
+        result = await run_evaluations(sample_interview)
 
         # Verify all LLM functions were called
         mock_openai.assert_called_once_with(

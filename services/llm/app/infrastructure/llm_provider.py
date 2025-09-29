@@ -148,7 +148,7 @@ async def call_openrouter_deepseek(prompt, rubric, transcript):
         print(error_message)
         return error_message
 
-def run_evaluations(interview: Interview) -> Interview:
+async def run_evaluations(interview: Interview) -> Interview:
     """
     Populates the evaluation fields of an Interview object by calling LLMs.
 
@@ -160,16 +160,16 @@ def run_evaluations(interview: Interview) -> Interview:
     """
     print(f"\nRunning evaluations for interview ID: {interview.interview_id}")
     
-    # Each LLM call uses the data from the interview object
-    interview.evaluation_1 = call_openai_gpt5(
+    # Each LLM call uses the data from the interview object - properly await async calls
+    interview.evaluation_1 = await call_openai_gpt5(
         interview.system_prompt, interview.rubric, interview.full_transcript
     )
     
-    interview.evaluation_2 = call_google_gemini(
+    interview.evaluation_2 = await call_google_gemini(
         interview.system_prompt, interview.rubric, interview.full_transcript
     )
     
-    interview.evaluation_3 = call_openrouter_deepseek(
+    interview.evaluation_3 = await call_openrouter_deepseek(
         interview.system_prompt, interview.rubric, interview.full_transcript
     )
     

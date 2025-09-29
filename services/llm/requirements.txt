@@ -7,6 +7,14 @@ pydantic-settings
 google-generativeai
 supabase
 
+# Evaluation and Reporting dependencies
+redis
+psycopg2-binary
+sqlalchemy
+reportlab
+pandas
+matplotlib
+
 # Testing dependencies
 pytest
 pytest-asyncio

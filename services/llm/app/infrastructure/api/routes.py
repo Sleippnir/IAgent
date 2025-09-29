@@ -108,6 +108,8 @@ async def list_models(
     
     return {"models": models}
 
+# Note: Interview evaluation endpoints have been moved to evaluation_routes.py
+
 
 # Interview evaluation endpoints
 from pydantic import BaseModel
@@ -192,8 +194,8 @@ async def evaluate_interview_from_file(file_path: str, source_type: str = "file"
         # Load interview from source
         interview = load_interview_from_source(source_type, file_path)
         
-        # Run evaluations
-        evaluated_interview = run_evaluations(interview)
+        # Run evaluations - now properly awaited
+        evaluated_interview = await run_evaluations(interview)
         
         return {
             "interview_id": evaluated_interview.interview_id,

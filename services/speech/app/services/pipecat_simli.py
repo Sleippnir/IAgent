@@ -15,10 +15,9 @@ from simli import SimliConfig
 from datetime import datetime
 from pathlib import Path
 
-from pipecat.services.google.stt import GoogleSTTService
+from pipecat.services.google.stt import GoogleSTTService, Language
 from pipecat.services.elevenlabs.tts import ElevenLabsTTSService  
 from pipecat.services.google.llm import GoogleLLMService
-from pipecat.services.google.stt import Language
 from pipecat.audio.turn.smart_turn.base_smart_turn import SmartTurnParams
 from pipecat.audio.turn.smart_turn.local_smart_turn_v3 import LocalSmartTurnAnalyzerV3
 from pipecat.audio.vad.silero import SileroVADAnalyzer
