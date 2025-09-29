@@ -1,33 +1,13 @@
-from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional, Dict, Any
+"""
+Interview domain entity for managing interview evaluation data.
+"""
 import json
-
-class PromptBase(BaseModel):
-    template: str
-    parameters: Dict[str, Any]
-    model: str
-    max_tokens: int
-    temperature: float
-
-class PromptCreate(PromptBase):
-    pass
-
-class PromptResponse(PromptBase):
-    id: str
-    created_at: datetime
-    response: Optional[str] = None
-    processed_at: Optional[datetime] = None
-    error: Optional[str] = None
-
-    class Config:
-        from_attributes = True
+from typing import Optional
 
 
-
-class Interviews:
+class Interview:
     """
-    A class to store and manage interview data for LLM evaluation.
+    A domain entity to store and manage interview data for LLM evaluation.
 
     This class holds all the necessary components for an interview evaluation task,
     including the system prompt for the LLM, the evaluation rubric, the job
@@ -38,7 +18,7 @@ class Interviews:
 
     def __init__(self, system_prompt=None, rubric=None, jd=None, full_transcript=None, interview_id=None):
         """
-        Initializes the Interviews object with mock data or provided values.
+        Initializes the Interview object with mock data or provided values.
 
         Args:
             system_prompt (str, optional): The system prompt for the LLM.
@@ -134,7 +114,7 @@ class Interviews:
 
     @classmethod
     def from_dict(cls, data):
-        """Creates an Interviews object from a dictionary."""
+        """Creates an Interview object from a dictionary."""
         interview = cls(
             interview_id=data.get('interview_id'),
             system_prompt=data.get('system_prompt'),
@@ -150,7 +130,7 @@ class Interviews:
     def __repr__(self):
         """Provides a developer-friendly string representation of the object."""
         return (
-            f"Interviews(id={self.interview_id}, "
+            f"Interview(id={self.interview_id}, "
             f"eval_1_populated={self.evaluation_1 is not None}, "
             f"eval_2_populated={self.evaluation_2 is not None}, "
             f"eval_3_populated={self.evaluation_3 is not None})"
@@ -160,28 +140,22 @@ class Interviews:
 # Example of how to use the class
 if __name__ == '__main__':
     # 1. Create an instance and give it an ID
-    interview_case = Interviews(interview_id="abc-123")
+    interview_case = Interview(interview_id="abc-123")
     interview_case.evaluation_1 = "Candidate shows strong potential."
 
     print("--- Original Object ---")
     print(interview_case)
     print(f"Evaluation 1: {interview_case.evaluation_1}")
 
-
     # 2. Serialize the object to a dictionary (e.g., to save as JSON or in a DB)
     interview_dict = interview_case.to_dict()
     print("\n--- Serialized to Dictionary ---")
     print(json.dumps(interview_dict, indent=2))
 
-
     # 3. Deserialize from the dictionary back into a new object
-    rehydrated_interview = Interviews.from_dict(interview_dict)
+    rehydrated_interview = Interview.from_dict(interview_dict)
     print("\n--- Rehydrated Object from Dictionary ---")
     print(rehydrated_interview)
     print(f"ID: {rehydrated_interview.interview_id}")
     print(f"JD: {rehydrated_interview.jd[:50]}...")
     print(f"Evaluation 1: {rehydrated_interview.evaluation_1}")
-
-
-
-

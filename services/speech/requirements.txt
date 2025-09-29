@@ -68,3 +68,5 @@ pipecat-ai[webrtc]
 simli-ai
 pipecat-ai[cartesia]
 pipecat-ai[deepgram]
+pipecat-ai[daily]
+pipecat_ai_small_webrtc_prebuilt

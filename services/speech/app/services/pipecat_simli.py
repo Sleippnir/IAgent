@@ -77,7 +77,7 @@ def get_qa_service():
 
 async def end_conversation(params: FunctionCallParams):
     # Optional: speak a goodbye
-    await params.llm.push_frame(TTSSpeakFrame("Okay, ending the session now."))
+    await params.llm.push_frame(TTSSpeakFrame("Okay, Thank you for koining us today, I'll be ending the session now."))
     # Push an EndTaskFrame upstream to terminate gracefully
     await params.llm.push_frame(EndTaskFrame(), FrameDirection.UPSTREAM)
     # Return a result object for the LLM (optional)
@@ -145,7 +145,6 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         end_conversation,
         cancel_on_interruption=True,
     )
-
 
     messages = [
         {

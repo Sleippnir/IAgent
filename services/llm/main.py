@@ -1,15 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.infrastructure.api.routes import router
-from app.infrastructure.config import Settings
+from app.infrastructure.config import get_settings
 import uvicorn
 
 def create_app() -> FastAPI:
-    settings = Settings()
+    settings = get_settings()
     
     app = FastAPI(
-        title="LLM Service",
-        description="Servicio de procesamiento de lenguaje natural",
+        title=settings.PROJECT_NAME,
+        description="Service for evaluating technical interviews using multiple LLM providers",
         version="1.0.0"
     )
     
@@ -32,7 +32,12 @@ app = create_app()
 # Health check
 @app.get("/healthz")
 async def health_check():
-    return {"status": "healthy", "service": "llm"}
+    settings = get_settings()
+    return {
+        "status": "healthy", 
+        "service": "llm-interview-evaluation",
+        "project_name": settings.PROJECT_NAME
+    }
 
 if __name__ == "__main__":
     uvicorn.run(
