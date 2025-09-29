@@ -5,10 +5,63 @@ These endpoints handle interview evaluation results and statistics
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, Literal
 from datetime import datetime
 
 router = APIRouter(prefix="/api/v1/evaluation", tags=["evaluation"])
+
+# Structured evaluation models based on rubric schema
+class CriterionScore(BaseModel):
+    score: Literal["very_weak", "weak", "strong", "very_strong"]
+    rationale: str
+    evidence: List[str]
+
+class TechnicalEvaluation(BaseModel):
+    problem_understanding: CriterionScore
+    technical_skills: CriterionScore
+    rationale: CriterionScore
+    communication: CriterionScore
+
+class BehavioralEvaluation(BaseModel):
+    question_understanding: CriterionScore
+    experience_competence: CriterionScore
+    self_awareness: CriterionScore
+    communication: CriterionScore
+
+class OverallAssessment(BaseModel):
+    quantitative_score: float  # 0-100
+    score_calculation: str
+    recommendation: Literal["strong_hire", "hire", "no_hire", "strong_no_hire"]
+    key_strengths: List[str]
+    areas_for_improvement: List[str]
+    summary: str
+
+class EvaluationMetadata(BaseModel):
+    evaluator: str
+    evaluation_timestamp: datetime
+    rubric_version: str
+
+class StructuredEvaluationResponse(BaseModel):
+    """Structured evaluation response following the rubric schema"""
+    interview_type: Literal["technical", "behavioral"]
+    technical_evaluation: Optional[TechnicalEvaluation] = None
+    behavioral_evaluation: Optional[BehavioralEvaluation] = None
+    overall_assessment: OverallAssessment
+    metadata: EvaluationMetadata
+
+# Experimental models for mixed interviews (testing only)
+class CriterionScoreExtended(BaseModel):
+    score: Literal["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+    rationale: str
+    evidence: List[str]
+
+class MixedEvaluationResponse(BaseModel):
+    """EXPERIMENTAL: Mixed interview evaluation response"""
+    interview_type: Literal["technical", "behavioral", "mixed"]
+    technical_evaluation: Optional[dict] = None  # Flexible for testing
+    behavioral_evaluation: Optional[dict] = None  # Flexible for testing
+    overall_assessment: dict  # Flexible for testing
+    metadata: dict  # Flexible for testing
 
 # Real response models based on actual Interview entity structure
 class InterviewEvaluationResponse(BaseModel):
@@ -63,6 +116,59 @@ async def get_interview_results(interview_id: str):
             evaluation_1=default_interview.evaluation_1,
             evaluation_2=default_interview.evaluation_2,
             evaluation_3=default_interview.evaluation_3
+        )
+
+# Structured Evaluation Endpoint - Returns rubric-based evaluation
+@router.get("/structured/{interview_id}", response_model=StructuredEvaluationResponse)
+async def get_structured_evaluation(interview_id: str):
+    """Get structured rubric-based evaluation for a specific interview"""
+    from ...infrastructure.llm_provider import load_interview_from_source, get_structured_evaluation
+    
+    try:
+        # Load interview from file (this is what actually exists)
+        interview = load_interview_from_source("file", f"{interview_id}.json")
+        
+        # Get structured evaluation using the rubric schema
+        structured_evaluation = await get_structured_evaluation(interview)
+        
+        return structured_evaluation
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Could not generate structured evaluation for interview {interview_id}: {str(e)}"
+        )
+
+# EXPERIMENTAL: Mixed Interview Evaluation Endpoint (for testing custom prompts/schemas)
+@router.post("/experimental/mixed/{interview_id}", response_model=MixedEvaluationResponse)
+async def get_mixed_evaluation_experimental(
+    interview_id: str,
+    custom_prompt: Optional[str] = None,
+    custom_schema: Optional[dict] = None
+):
+    """
+    EXPERIMENTAL: Get mixed interview evaluation with custom prompts/schemas
+    This endpoint allows testing different prompt strategies without affecting main logic
+    """
+    from ...infrastructure.llm_provider import load_interview_from_source, get_mixed_evaluation_experimental
+    
+    try:
+        # Load interview from file
+        interview = load_interview_from_source("file", f"{interview_id}.json")
+        
+        # Use experimental function with custom parameters
+        experimental_evaluation = await get_mixed_evaluation_experimental(
+            interview, 
+            custom_prompt=custom_prompt,
+            custom_schema=custom_schema
+        )
+        
+        return experimental_evaluation
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Experimental evaluation failed for interview {interview_id}: {str(e)}"
         )
 
 # Export Endpoint - Only supports JSON export since that's what actually exists
