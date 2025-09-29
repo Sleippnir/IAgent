@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Avatar - Thank You</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #121213;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: #e0e0e0;
+            text-align: center;
+        }
+        #video-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        video {
+            width: 80vw;
+            max-width: 960px;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.7);
+        }
+        p {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 12px;
+            border: 1px solid #007bff;
+            background-color: transparent;
+            color: #007bff;
+            transition: all 0.2s ease;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <h1>Thank You</h1>
+        <p>Your session has now ended.</p>
+        <video id="outroVideo" autoplay playsinline>
+            <!-- Path updated to local video file -->
+            <source src="video/outro.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <button id="restartButton">Start New Session</button>
+    </div>
+
+    <script>
+        const restartButton = document.getElementById('restartButton');
+        restartButton.onclick = () => {
+            // Updated to navigate back to the new index.html
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>
+

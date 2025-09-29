@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PipeCat AI Avatar</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        #main-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        #avatar-container {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            background-color: #000;
+        }
+        #avatarVideo {
+            display: block;
+            width: 800px; /* Main avatar video */
+            height: 600px;
+        }
+        #user-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #userVideo {
+            display: block;
+            width: 320px; /* Smaller user webcam */
+            height: 240px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            background-color: #2c2c2c;
+            /* Flip the video horizontally for a "mirror" effect */
+            transform: scaleX(-1);
+        }
+        #controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #007bff;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        button:disabled {
+            background-color: #aaa;
+            border-color: #aaa;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AI Avatar Interaction</h1>
+
+    <div id="main-container">
+        <div id="avatar-container">
+            <video id="avatarVideo" autoplay playsinline></video>
+        </div>
+        <div id="user-container">
+            <h3>Your Camera</h3>
+            <video id="userVideo" autoplay playsinline muted></video>
+        </div>
+    </div>
+
+    <div id="controls">
+        <p id="status">Status: Initializing...</p>
+        <button id="retryButton" class="hidden">Retry Connection</button>
+    </div>
+
+    <script>
+        const avatarVideoElement = document.getElementById('avatarVideo');
+        const userVideoElement = document.getElementById('userVideo');
+        const statusElement = document.getElementById('status');
+        const retryButton = document.getElementById('retryButton');
+        
+        const API_URL = "http://localhost:7860/api/offer";
+        let peerConnection;
+        let userStream;
+
+        const cleanup = () => {
+            console.log("Running cleanup function...");
+            if (userStream) {
+                userStream.getTracks().forEach(track => track.stop());
+                console.log("User media tracks stopped.");
+            }
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+                console.log("PeerConnection closed.");
+            }
+            userVideoElement.srcObject = null;
+            avatarVideoElement.srcObject = null;
+            retryButton.classList.remove('hidden');
+        };
+
+        const connect = async () => {
+            retryButton.classList.add('hidden');
+            statusElement.innerText = "Status: Initializing...";
+            console.log("Attempting to connect...");
+
+            try {
+                // Step 1: Get user media
+                statusElement.innerText = "Status: Please grant camera/mic permissions...";
+                userStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true,
+                });
+                userVideoElement.srcObject = userStream;
+                console.log("User media stream acquired.");
+
+                // Step 2: Create PeerConnection
+                peerConnection = new RTCPeerConnection();
+                userStream.getTracks().forEach(track => peerConnection.addTrack(track, userStream));
+                console.log("PeerConnection created and tracks added.");
+
+                // Step 3: Handle incoming tracks from the bot
+                peerConnection.ontrack = (event) => {
+                    console.log(`Received remote track of kind: ${event.track.kind}`);
+                    if (event.streams && event.streams[0]) {
+                        avatarVideoElement.srcObject = event.streams[0];
+                    }
+                };
+
+                // Step 4: Create offer and send it via HTTP POST
+                statusElement.innerText = "Status: Creating connection offer...";
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                console.log("Local offer created:", offer);
+
+                statusElement.innerText = `Status: Sending offer to bot at ${API_URL}...`;
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(offer)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+
+                const answer = await response.json();
+                console.log("Received answer from bot:", answer);
+
+                // Step 5: Set remote description
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                statusElement.innerText = "Status: Connected";
+                console.log("Connection established successfully.");
+
+            } catch (err) {
+                console.error("Connection failed:", err);
+                statusElement.innerText = `Error: ${err.message}. Is the bot running?`;
+                cleanup();
+            }
+        };
+
+        retryButton.onclick = connect;
+        window.onload = connect;
+
+    </script>
+</body>
+</html>
+
