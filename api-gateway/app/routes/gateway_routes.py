@@ -13,7 +13,7 @@ SERVICES = {
     "orchestrator": "http://localhost:8001",
     "core": "http://localhost:8002",
     "llm": "http://localhost:8003",
-    "speech": "http://localhost:8004",
+    "speech": "http://speech:8004",
     "evaluation": "http://localhost:8005"
 }
 

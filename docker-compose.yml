@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+
+  # Redis para cache y streams
+  redis:
+    image: redis:7-alpine
+    container_name: iagent_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - iagent_network
+
+  # API Gateway
+  gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: iagent_gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - GATEWAY_HOST=0.0.0.0
+      - GATEWAY_PORT=8080
+      - CORE_SERVICE_URL=http://core:8001
+      - SPEECH_SERVICE_URL=http://speech:8002
+      - LLM_SERVICE_URL=http://llm:8004
+      - EVALUATION_SERVICE_URL=http://evaluation:8005
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - iagent_network
+
+  # Core Service
+  #core:
+  #  build:
+  #    context: ./services/core
+  #    dockerfile: Dockerfile
+  #  container_name: iagent_core
+  #  ports:
+  #    - "8001:8001"
+  #  environment:
+  #    - CORE_HOST=0.0.0.0
+  #    - CORE_PORT=8001
+  #    - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/iagent_db
+  #    - REDIS_HOST=redis
+  #    - REDIS_PORT=6379
+  #  depends_on:
+  #    - postgres
+  #    - redis
+  #  networks:
+  #    - iagent_network
+
+  # Speech Service
+  speech:
+    build:
+      context: ./services/speech
+      dockerfile: Dockerfile
+    container_name: iagent_speech
+    ports:
+      - "8002:8002"
+    environment:
+      - SPEECH_HOST=0.0.0.0
+      - SPEECH_PORT=8002
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_URL=redis://redis:6379/0
+      - CONVERSATION_TTL=24
+      - DEBUG=true
+      - DEVELOPMENT_MODE=true
+    depends_on:
+      - redis
+    networks:
+      - iagent_network
+
+
+  # Evaluation & Reporting Service
+  #evaluation:
+  #  build:
+  #    context: ./services/evaluation-reporting
+  #    dockerfile: Dockerfile
+  #  container_name: iagent_evaluation
+  #  ports:
+  #    - "8005:8005"
+  #  environment:
+  #    - EVALUATION_HOST=0.0.0.0
+  #    - EVALUATION_PORT=8005
+  #    - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/iagent_db
+  #    - MONGODB_URL=mongodb://admin:admin123@mongodb:27017/iagent_reports?authSource=admin
+  #  depends_on:
+  #    - postgres
+  #    - mongodb
+  #  networks:
+  #    - iagent_network
+
+volumes:
+  redis_data:
+
+networks:
+  iagent_network:
+    driver: bridge

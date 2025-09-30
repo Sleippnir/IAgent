@@ -3,97 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎙️ Agente de Voz IA</title>
+    <title>IAgent - Asistente de Voz</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            margin-top: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
             padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
         h1 {
+            color: #333;
+            margin-bottom: 30px;
             font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 300;
         }
-        .subtitle {
-            font-size: 1.2em;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
-        #status { 
-            font-size: 24px; 
-            margin: 30px 0;
+        
+        .status {
             padding: 15px;
-            background: rgba(255,255,255,0.1);
             border-radius: 10px;
-            backdrop-filter: blur(10px);
+            margin: 20px 0;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
-        button { 
-            padding: 15px 30px; 
-            font-size: 18px;
-            background: #4CAF50;
+        
+        .status.disconnected {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 2px solid #ffcdd2;
+        }
+        
+        .status.connecting {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            border: 2px solid #ffcc02;
+        }
+        
+        .status.connected {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #a5d6a7;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .connect-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 25px;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            min-width: 150px;
         }
-        button:hover {
-            background: #45a049;
+        
+        .disconnect-btn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+        }
+        
+        .connect-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
-        button:disabled {
-            background: #cccccc;
+        
+        .connect-btn:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        .logs-container {
-            margin-top: 40px;
-            text-align: left;
-            background: rgba(255,255,255,0.1);
+        
+        .audio-status {
+            margin: 30px 0;
+            display: none;
+            text-align: center;
+        }
+        
+        .audio-status.show {
+            display: block;
+        }
+        
+        .audio-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .audio-icon {
+            font-size: 1.3em;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .logs {
+            background: #f5f5f5;
             border-radius: 10px;
             padding: 20px;
-            backdrop-filter: blur(10px);
-        }
-        .logs {
-            max-height: 300px;
+            margin-top: 30px;
+            text-align: left;
+            max-height: 200px;
             overflow-y: auto;
-            font-family: monospace;
-            font-size: 14px;
-            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
         }
+        
         .log-entry {
             margin: 5px 0;
             padding: 5px;
             border-radius: 3px;
-            background: rgba(255,255,255,0.05);
+        }
+        
+        .log-info {
+            color: #1976d2;
+        }
+        
+        .log-success {
+            color: #388e3c;
+        }
+        
+        .log-error {
+            color: #d32f2f;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎙️ Agente de Voz IA</h1>
-        <p class="subtitle">Conversación inteligente en tiempo real</p>
-        <p id="status">Desconectado</p>
-        <button id="connect-btn">Conectar</button>
-        <audio id="audio-el" autoplay></audio>
+        <h1>🤖 IAgent</h1>
+        <p>Asistente de Voz Inteligente</p>
         
-        <div class="logs-container">
-            <h3>📋 Registro de Actividad</h3>
-            <div class="logs" id="logs"></div>
+        <div id="status" class="status disconnected">
+            Desconectado
+        </div>
+        
+        <div class="button-container">
+            <button id="connectBtn" class="connect-btn">
+                Conectar
+            </button>
+            <button id="disconnectBtn" class="connect-btn disconnect-btn" style="display: none;">
+                Desconectar
+            </button>
+        </div>
+        
+        <div id="audioStatus" class="audio-status">
+            <div class="audio-indicator">
+                <span class="audio-icon">🎧</span>
+                <span>Audio conectado</span>
+            </div>
+            <audio id="remoteAudio" style="display: none;" autoplay></audio>
+        </div>
+        
+        <div class="logs">
+            <div id="logs"></div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Configuración
+        const API_GATEWAY_URL = '';  // Usar el mismo host que el frontend
+        const SPEECH_SERVICE_ENDPOINT = '/api/v1/speech';
+        
+        // Referencias a elementos DOM
+        const statusElement = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const audioStatus = document.getElementById('audioStatus');
+        const remoteAudio = document.getElementById('remoteAudio');
+        const logsElement = document.getElementById('logs');
+        
+        // Estado de la aplicación
+        let isConnected = false;
+        let peerConnection = null;
+        
+        // ID de la entrevista (hardcodeado para pruebas)
+        const interviewId = 1;
+        
+        // Función para agregar logs
+        function addLog(message, type = 'info') {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsElement.appendChild(logEntry);
+            logsElement.scrollTop = logsElement.scrollHeight;
+        }
+        
+        // Función para actualizar el estado
+        function updateStatus(status, message) {
+            statusElement.className = `status ${status}`;
+            statusElement.textContent = message;
+            addLog(`Estado: ${message}`, status === 'connected' ? 'success' : 'info');
+        }
+        
+        // Función para crear conexión WebRTC
+        async function createWebRTCConnection() {
+            const connectionStartTime = performance.now();
+            try {
+                addLog('🚀 Iniciando conexión WebRTC...');
+                // Configuración de WebRTC
+                const configuration = {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' }
+                    ]
+                };
+                
+                // Crear peer connection
+                const pcCreateStart = performance.now();
+                peerConnection = new RTCPeerConnection(configuration);
+                addLog(`⏱️ Peer connection creada en ${(performance.now() - pcCreateStart).toFixed(1)}ms`);
+                
+                // Manejar stream remoto
+                peerConnection.ontrack = (event) => {
+                    addLog('Stream de audio recibido', 'success');
+                    remoteAudio.srcObject = event.streams[0];
+                    audioStatus.classList.add('show');
+                };
+                
+                // Manejar cambios de estado de conexión
+                peerConnection.onconnectionstatechange = () => {
+                    addLog(`Estado WebRTC: ${peerConnection.connectionState}`);
+                    
+                    if (peerConnection.connectionState === 'connected') {
+                        updateStatus('connected', 'Conectado');
+                        connectBtn.style.display = 'none';
+                        disconnectBtn.style.display = 'inline-block';
+                        isConnected = true;
+                    } else if (peerConnection.connectionState === 'disconnected' || 
+                              peerConnection.connectionState === 'failed') {
+                        handleDisconnection();
+                    }
+                };
+                
+                // Obtener acceso al micrófono
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, stream);
+                });
+                
+                addLog('Micrófono configurado', 'success');
+                
+                // Crear oferta
+                const offerStart = performance.now();
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                addLog(`⏱️ Oferta SDP creada en ${(performance.now() - offerStart).toFixed(1)}ms`);
+                
+                // Esperar a que se complete la recolección de candidatos ICE
+                const iceStart = performance.now();
+                await waitForIceGatheringComplete();
+                addLog(`⏱️ Candidatos ICE recolectados en ${(performance.now() - iceStart).toFixed(1)}ms`);              // Enviar oferta al speech service a través del API Gateway
+                const serverStart = performance.now();
+                console.log('🔗 Enviando solicitud a:', `${API_GATEWAY_URL}${SPEECH_SERVICE_ENDPOINT}/offer`);
+                console.log('📦 Datos a enviar:', {
+                    sdp: peerConnection.localDescription.sdp,
+                    type: peerConnection.localDescription.type,
+                    interview_id: interviewId
+                });
+                
+                const response = await fetch(`${API_GATEWAY_URL}${SPEECH_SERVICE_ENDPOINT}/offer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sdp: peerConnection.localDescription.sdp,
+                        type: peerConnection.localDescription.type,
+                        interview_id: interviewId
+                    })
+                }).catch(error => {
+                    console.error('❌ Error en fetch:', error);
+                    throw error;
+                });
+                
+                console.log('📡 Respuesta recibida:', response);
+                console.log('📊 Status:', response.status, response.statusText);
+                addLog(`⏱️ Respuesta del servidor recibida en ${(performance.now() - serverStart).toFixed(1)}ms`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error del servidor: ${response.status}`);
+                }
+                
+                const answer = await response.json();
+                addLog('Respuesta recibida del servidor', 'success');
+                
+                // Establecer descripción remota
+                await peerConnection.setRemoteDescription({
+                    type: answer.type,
+                    sdp: answer.sdp
+                });
+                
+                const totalConnectionTime = performance.now() - connectionStartTime;
+                addLog('✅ Conexión WebRTC establecida exitosamente', 'success');
+                addLog(`⏱️ Tiempo total de conexión: ${totalConnectionTime.toFixed(1)}ms`);
+                
+            } catch (error) {
+                addLog(`Error en conexión: ${error.message}`, 'error');
+                handleDisconnection();
+            }
+        }
+        
+        // Función para esperar la recolección completa de candidatos ICE con timeout optimizado
+        function waitForIceGatheringComplete() {
+            return new Promise((resolve) => {
+                if (peerConnection.iceGatheringState === 'complete') {
+                    addLog('Candidatos ICE ya recolectados');
+                    resolve();
+                } else {
+                    let timeout;
+                    const onStateChange = () => {
+                        if (peerConnection.iceGatheringState === 'complete') {
+                            clearTimeout(timeout);
+                            addLog('Recolección de candidatos ICE completada');
+                            resolve();
+                        }
+                    };
+                    
+                    peerConnection.addEventListener('icegatheringstatechange', onStateChange);
+                    
+                    // Timeout agresivo de 3 segundos para evitar esperas excesivas
+                    timeout = setTimeout(() => {
+                        peerConnection.removeEventListener('icegatheringstatechange', onStateChange);
+                        addLog('Timeout en recolección ICE - continuando con candidatos disponibles', 'warning');
+                        resolve();
+                    }, 3000);
+                }
+            });
+        }
+        
+        // Función para manejar desconexión
+        function handleDisconnection() {
+            isConnected = false;
+            updateStatus('disconnected', 'Desconectado');
+            connectBtn.style.display = 'inline-block';
+            disconnectBtn.style.display = 'none';
+            connectBtn.disabled = false;
+            audioStatus.classList.remove('show');
+            
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            
+            addLog('Desconectado del servicio', 'info');
+        }
+        
+        // Función para conectar
+        async function connectToService() {
+            connectBtn.disabled = true;
+            updateStatus('connecting', 'Conectando...');
+            connectBtn.textContent = 'Conectando...';
+            
+            try {
+                await createWebRTCConnection();
+            } catch (error) {
+                addLog(`Error de conexión: ${error.message}`, 'error');
+                handleDisconnection();
+            }
+        }
+        
+        // Función para desconectar
+        function disconnectFromService() {
+            addLog('Desconectando por solicitud del usuario...');
+            handleDisconnection();
+        }
+        
+        // Event listeners
+        connectBtn.addEventListener('click', connectToService);
+        disconnectBtn.addEventListener('click', disconnectFromService);
+        
+        // Inicialización
+        addLog('Aplicación iniciada');
+        addLog(`API Gateway: ${API_GATEWAY_URL}`);
+    </script>
 </body>
 </html>

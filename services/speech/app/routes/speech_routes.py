@@ -46,7 +46,7 @@ async def offer(request: dict, background_tasks: BackgroundTasks):
     Endpoint para manejar ofertas SDP.
     
     Args:
-        request: Diccionario con la oferta SDP
+        request: Diccionario con la oferta SDP y opcionalmente interview_id
         background_tasks: Tareas en segundo plano
         
     Returns:
@@ -55,5 +55,6 @@ async def offer(request: dict, background_tasks: BackgroundTasks):
     pc_id = request.get("pc_id", "")
     sdp = request.get("sdp", "")
     type = request.get("type", "")
+    interview_id = request.get("interview_id")
 
-    return await speech_service.offer(pc_id, sdp, type, background_tasks)
+    return await speech_service.offer(pc_id, sdp, type, interview_id, background_tasks)
