@@ -60,6 +60,7 @@ google-cloud-texttospeech>=2.30.0
 loguru>=0.7.0
 
 # WebRTC implementation for real-time communication
+opencv-python
 aiortc>=1.6.0
 pipecat[daily]
 pipecat-ai[silero]
