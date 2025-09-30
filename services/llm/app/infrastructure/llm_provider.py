@@ -194,269 +194,269 @@ async def run_evaluations(interview: Interview) -> Interview:
     print("Evaluations completed.")
     return interview
 
-async def get_structured_evaluation(interview):
-    """
-    Generate structured evaluation using rubric schema
-    Returns structured JSON response based on the defined rubric
-    """
-    import json
-    from datetime import datetime
+# async def get_structured_evaluation(interview):
+#     """
+#     Generate structured evaluation using rubric schema
+#     Returns structured JSON response based on the defined rubric
+#     """
+#     import json
+#     from datetime import datetime
     
-    # Load the evaluation prompt template
-    prompt_template = """
-You are an expert technical/behavioral interviewer. Analyze this interview and provide a structured evaluation.
+#     # Load the evaluation prompt template
+#     prompt_template = """
+# You are an expert technical/behavioral interviewer. Analyze this interview and provide a structured evaluation.
 
-You MUST respond with valid JSON that follows this exact structure for {interview_type} interview:
+# You MUST respond with valid JSON that follows this exact structure for {interview_type} interview:
 
-{schema_example}
+# {schema_example}
 
-**Job Description:**
-{job_description}
+# **Job Description:**
+# {job_description}
 
-**Interview Transcript:**
-{transcript}
+# **Interview Transcript:**
+# {transcript}
 
-Analyze carefully and provide structured evaluation in valid JSON format only. No additional text.
-"""
+# Analyze carefully and provide structured evaluation in valid JSON format only. No additional text.
+# """
     
-    # Determine interview type based on content
-    interview_type = "technical" if "algorithm" in interview.full_transcript.lower() or "code" in interview.full_transcript.lower() else "behavioral"
+#     # Determine interview type based on content
+#     interview_type = "technical" if "algorithm" in interview.full_transcript.lower() or "code" in interview.full_transcript.lower() else "behavioral"
     
-    # Create schema example based on interview type
-    if interview_type == "technical":
-        schema_example = """{
-  "interview_type": "technical",
-  "technical_evaluation": {
-    "problem_understanding": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]},
-    "technical_skills": {"score": "very_strong", "rationale": "explanation", "evidence": ["example1"]},
-    "rationale": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]},
-    "communication": {"score": "very_strong", "rationale": "explanation", "evidence": ["example1"]}
-  },
-  "overall_assessment": {
-    "quantitative_score": 87.5,
-    "score_calculation": "explanation",
-    "recommendation": "hire",
-    "key_strengths": ["strength1"],
-    "areas_for_improvement": ["area1"],
-    "summary": "summary"
-  },
-  "metadata": {
-    "evaluator": "GPT-5",
-    "evaluation_timestamp": "2025-09-29T10:30:00Z",
-    "rubric_version": "v1.0"
-  }
-}"""
-    else:
-        schema_example = """{
-  "interview_type": "behavioral",
-  "behavioral_evaluation": {
-    "question_understanding": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]},
-    "experience_competence": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]},
-    "self_awareness": {"score": "very_strong", "rationale": "explanation", "evidence": ["example1"]},
-    "communication": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]}
-  },
-  "overall_assessment": {
-    "quantitative_score": 82.5,
-    "score_calculation": "explanation",
-    "recommendation": "hire",
-    "key_strengths": ["strength1"],
-    "areas_for_improvement": ["area1"],
-    "summary": "summary"
-  },
-  "metadata": {
-    "evaluator": "GPT-5",
-    "evaluation_timestamp": "2025-09-29T10:30:00Z",
-    "rubric_version": "v1.0"
-  }
-}"""
+#     # Create schema example based on interview type
+#     if interview_type == "technical":
+#         schema_example = """{
+#   "interview_type": "technical",
+#   "technical_evaluation": {
+#     "problem_understanding": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]},
+#     "technical_skills": {"score": "very_strong", "rationale": "explanation", "evidence": ["example1"]},
+#     "rationale": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]},
+#     "communication": {"score": "very_strong", "rationale": "explanation", "evidence": ["example1"]}
+#   },
+#   "overall_assessment": {
+#     "quantitative_score": 87.5,
+#     "score_calculation": "explanation",
+#     "recommendation": "hire",
+#     "key_strengths": ["strength1"],
+#     "areas_for_improvement": ["area1"],
+#     "summary": "summary"
+#   },
+#   "metadata": {
+#     "evaluator": "GPT-5",
+#     "evaluation_timestamp": "2025-09-29T10:30:00Z",
+#     "rubric_version": "v1.0"
+#   }
+# }"""
+#     else:
+#         schema_example = """{
+#   "interview_type": "behavioral",
+#   "behavioral_evaluation": {
+#     "question_understanding": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]},
+#     "experience_competence": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]},
+#     "self_awareness": {"score": "very_strong", "rationale": "explanation", "evidence": ["example1"]},
+#     "communication": {"score": "strong", "rationale": "explanation", "evidence": ["example1"]}
+#   },
+#   "overall_assessment": {
+#     "quantitative_score": 82.5,
+#     "score_calculation": "explanation",
+#     "recommendation": "hire",
+#     "key_strengths": ["strength1"],
+#     "areas_for_improvement": ["area1"],
+#     "summary": "summary"
+#   },
+#   "metadata": {
+#     "evaluator": "GPT-5",
+#     "evaluation_timestamp": "2025-09-29T10:30:00Z",
+#     "rubric_version": "v1.0"
+#   }
+# }"""
     
-    # Format the prompt
-    formatted_prompt = prompt_template.format(
-        interview_type=interview_type,
-        schema_example=schema_example,
-        job_description=interview.jd,
-        transcript=interview.full_transcript
-    )
+#     # Format the prompt
+#     formatted_prompt = prompt_template.format(
+#         interview_type=interview_type,
+#         schema_example=schema_example,
+#         job_description=interview.jd,
+#         transcript=interview.full_transcript
+#     )
     
-    try:
-        # Call GPT-5 for structured evaluation
-        response = await call_openai_gpt5(formatted_prompt, interview.rubric, "")
+#     try:
+#         # Call GPT-5 for structured evaluation
+#         response = await call_openai_gpt5(formatted_prompt, interview.rubric, "")
         
-        # Parse JSON response
-        evaluation_data = json.loads(response)
+#         # Parse JSON response
+#         evaluation_data = json.loads(response)
         
-        # Add metadata if missing
-        if "metadata" not in evaluation_data:
-            evaluation_data["metadata"] = {
-                "evaluator": "GPT-5",
-                "evaluation_timestamp": datetime.now().isoformat() + "Z",
-                "rubric_version": "v1.0"
-            }
+#         # Add metadata if missing
+#         if "metadata" not in evaluation_data:
+#             evaluation_data["metadata"] = {
+#                 "evaluator": "GPT-5",
+#                 "evaluation_timestamp": datetime.now().isoformat() + "Z",
+#                 "rubric_version": "v1.0"
+#             }
         
-        return evaluation_data
+#         return evaluation_data
         
-    except json.JSONDecodeError as e:
-        # If JSON parsing fails, return a structured error response
-        return {
-            "interview_type": interview_type,
-            "overall_assessment": {
-                "quantitative_score": 0,
-                "score_calculation": "Error in evaluation process",
-                "recommendation": "no_hire",
-                "key_strengths": [],
-                "areas_for_improvement": ["Evaluation could not be completed"],
-                "summary": f"Structured evaluation failed: {str(e)}"
-            },
-            "metadata": {
-                "evaluator": "GPT-5",
-                "evaluation_timestamp": datetime.now().isoformat() + "Z",
-                "rubric_version": "v1.0"
-            }
-        }
-    except Exception as e:
-        # Generic error handling
-        return {
-            "interview_type": interview_type,
-            "overall_assessment": {
-                "quantitative_score": 0,
-                "score_calculation": "Error in evaluation process",
-                "recommendation": "no_hire", 
-                "key_strengths": [],
-                "areas_for_improvement": ["Evaluation could not be completed"],
-                "summary": f"Evaluation failed: {str(e)}"
-            },
-            "metadata": {
-                "evaluator": "GPT-5",
-                "evaluation_timestamp": datetime.now().isoformat() + "Z",
-                "rubric_version": "v1.0"
-            }
-        }
+#     except json.JSONDecodeError as e:
+#         # If JSON parsing fails, return a structured error response
+#         return {
+#             "interview_type": interview_type,
+#             "overall_assessment": {
+#                 "quantitative_score": 0,
+#                 "score_calculation": "Error in evaluation process",
+#                 "recommendation": "no_hire",
+#                 "key_strengths": [],
+#                 "areas_for_improvement": ["Evaluation could not be completed"],
+#                 "summary": f"Structured evaluation failed: {str(e)}"
+#             },
+#             "metadata": {
+#                 "evaluator": "GPT-5",
+#                 "evaluation_timestamp": datetime.now().isoformat() + "Z",
+#                 "rubric_version": "v1.0"
+#             }
+#         }
+#     except Exception as e:
+#         # Generic error handling
+#         return {
+#             "interview_type": interview_type,
+#             "overall_assessment": {
+#                 "quantitative_score": 0,
+#                 "score_calculation": "Error in evaluation process",
+#                 "recommendation": "no_hire", 
+#                 "key_strengths": [],
+#                 "areas_for_improvement": ["Evaluation could not be completed"],
+#                 "summary": f"Evaluation failed: {str(e)}"
+#             },
+#             "metadata": {
+#                 "evaluator": "GPT-5",
+#                 "evaluation_timestamp": datetime.now().isoformat() + "Z",
+#                 "rubric_version": "v1.0"
+#             }
+#         }
 
-async def get_mixed_evaluation_experimental(interview, custom_prompt=None, custom_schema=None):
-    """
-    EXPERIMENTAL: Generate structured evaluation for mixed interviews
-    This is a separate function for testing mixed interview support
-    Parameters can be passed externally to customize behavior
-    """
-    import json
-    import re
-    from datetime import datetime
+# async def get_mixed_evaluation_experimental(interview, custom_prompt=None, custom_schema=None):
+#     """
+#     EXPERIMENTAL: Generate structured evaluation for mixed interviews
+#     This is a separate function for testing mixed interview support
+#     Parameters can be passed externally to customize behavior
+#     """
+#     import json
+#     import re
+#     from datetime import datetime
     
-    # Use custom prompt if provided, otherwise use default
-    if custom_prompt is None:
-        # Analyze transcript to determine interview type and content
-        transcript_lower = interview.full_transcript.lower()
+#     # Use custom prompt if provided, otherwise use default
+#     if custom_prompt is None:
+#         # Analyze transcript to determine interview type and content
+#         transcript_lower = interview.full_transcript.lower()
         
-        # Technical indicators
-        technical_keywords = [
-            'algorithm', 'code', 'coding', 'implement', 'function', 'class', 
-            'data structure', 'complexity', 'big o', 'debug', 'test case',
-            'programming', 'software', 'technical problem', 'solution'
-        ]
+#         # Technical indicators
+#         technical_keywords = [
+#             'algorithm', 'code', 'coding', 'implement', 'function', 'class', 
+#             'data structure', 'complexity', 'big o', 'debug', 'test case',
+#             'programming', 'software', 'technical problem', 'solution'
+#         ]
         
-        # Behavioral indicators  
-        behavioral_keywords = [
-            'tell me about a time', 'describe a situation', 'how did you handle',
-            'leadership', 'conflict', 'teamwork', 'challenge', 'failure',
-            'star method', 'experience', 'example', 'situation', 'task', 'action', 'result'
-        ]
+#         # Behavioral indicators  
+#         behavioral_keywords = [
+#             'tell me about a time', 'describe a situation', 'how did you handle',
+#             'leadership', 'conflict', 'teamwork', 'challenge', 'failure',
+#             'star method', 'experience', 'example', 'situation', 'task', 'action', 'result'
+#         ]
         
-        # Count occurrences
-        technical_score = sum(1 for keyword in technical_keywords if keyword in transcript_lower)
-        behavioral_score = sum(1 for keyword in behavioral_keywords if keyword in transcript_lower)
+#         # Count occurrences
+#         technical_score = sum(1 for keyword in technical_keywords if keyword in transcript_lower)
+#         behavioral_score = sum(1 for keyword in behavioral_keywords if keyword in transcript_lower)
         
-        # Determine interview type
-        if technical_score > 0 and behavioral_score > 0:
-            interview_type = "mixed"
-            tech_weight = technical_score / (technical_score + behavioral_score)
-            behavioral_weight = 1 - tech_weight
-        elif technical_score > behavioral_score:
-            interview_type = "technical"
-            tech_weight = 1.0
-            behavioral_weight = 0.0
-        elif behavioral_score > technical_score:
-            interview_type = "behavioral"
-            tech_weight = 0.0
-            behavioral_weight = 1.0
-        else:
-            # Default to mixed if unclear
-            interview_type = "mixed"
-            tech_weight = 0.5
-            behavioral_weight = 0.5
+#         # Determine interview type
+#         if technical_score > 0 and behavioral_score > 0:
+#             interview_type = "mixed"
+#             tech_weight = technical_score / (technical_score + behavioral_score)
+#             behavioral_weight = 1 - tech_weight
+#         elif technical_score > behavioral_score:
+#             interview_type = "technical"
+#             tech_weight = 1.0
+#             behavioral_weight = 0.0
+#         elif behavioral_score > technical_score:
+#             interview_type = "behavioral"
+#             tech_weight = 0.0
+#             behavioral_weight = 1.0
+#         else:
+#             # Default to mixed if unclear
+#             interview_type = "mixed"
+#             tech_weight = 0.5
+#             behavioral_weight = 0.5
         
-        # Default prompt template
-        custom_prompt = f"""
-You are an expert interviewer analyzing a {interview_type} interview.
+#         # Default prompt template
+#         custom_prompt = f"""
+# You are an expert interviewer analyzing a {interview_type} interview.
 
-**Job Description:** {interview.jd}
-**Rubric:** {interview.rubric}
-**Interview Transcript:** {interview.full_transcript}
+# **Job Description:** {interview.jd}
+# **Rubric:** {interview.rubric}
+# **Interview Transcript:** {interview.full_transcript}
 
-Provide structured evaluation in JSON format.
-"""
+# Provide structured evaluation in JSON format.
+# """
     
-    try:
-        # Call GPT-5 for structured evaluation
-        response = await call_openai_gpt5(custom_prompt, "", "")
+#     try:
+#         # Call GPT-5 for structured evaluation
+#         response = await call_openai_gpt5(custom_prompt, "", "")
         
-        # If custom schema provided, validate against it
-        # Otherwise use default parsing
-        evaluation_data = json.loads(response)
+#         # If custom schema provided, validate against it
+#         # Otherwise use default parsing
+#         evaluation_data = json.loads(response)
         
-        return evaluation_data
+#         return evaluation_data
         
-    except Exception as e:
-        return {
-            "error": f"Experimental evaluation failed: {str(e)}",
-            "interview_type": "unknown",
-            "metadata": {
-                "evaluator": "GPT-5-Experimental",
-                "evaluation_timestamp": datetime.now().isoformat() + "Z",
-                "note": "This is an experimental function"
-            }
-        }
+#     except Exception as e:
+#         return {
+#             "error": f"Experimental evaluation failed: {str(e)}",
+#             "interview_type": "unknown",
+#             "metadata": {
+#                 "evaluator": "GPT-5-Experimental",
+#                 "evaluation_timestamp": datetime.now().isoformat() + "Z",
+#                 "note": "This is an experimental function"
+#             }
+#         }
 
-# --- Main Execution Block: Example Workflow ---
+# # --- Main Execution Block: Example Workflow ---
 
-if __name__ == '__main__':
-    # Example 1: Using file-based storage
-    print("=== File-based Example ===")
+# if __name__ == '__main__':
+#     # Example 1: Using file-based storage
+#     print("=== File-based Example ===")
     
-    # Create a dummy JSON file to act as our data source
-    dummy_data = {
-        "interview_id": "file-xyz-789",
-        "system_prompt": "You are a hiring manager.",
-        "rubric": "Score technical skills from 1-5.",
-        "jd": "Senior Python Developer role.",
-        "full_transcript": "Interviewer: Tell me about a time... Candidate: Sure, there was a project where..."
-    }
-    file_path = os.path.join(settings.STORAGE_PATH, "interviews", settings.SAMPLE_INTERVIEW_FILE)
+#     # Create a dummy JSON file to act as our data source
+#     dummy_data = {
+#         "interview_id": "file-xyz-789",
+#         "system_prompt": "You are a hiring manager.",
+#         "rubric": "Score technical skills from 1-5.",
+#         "jd": "Senior Python Developer role.",
+#         "full_transcript": "Interviewer: Tell me about a time... Candidate: Sure, there was a project where..."
+#     }
+#     file_path = os.path.join(settings.STORAGE_PATH, "interviews", settings.SAMPLE_INTERVIEW_FILE)
     
-    # Ensure the directory exists
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+#     # Ensure the directory exists
+#     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     
-    with open(file_path, 'w') as f:
-        json.dump(dummy_data, f, indent=2)
+#     with open(file_path, 'w') as f:
+#         json.dump(dummy_data, f, indent=2)
 
-    # 1. Load the interview object from the file
-    try:
-        my_interview = load_interview_from_source(source_type='file', identifier=file_path)
-        print("\n--- Interview Object Loaded from File ---")
-        print(my_interview)
-        print(f"Job Description: {my_interview.jd}")
+#     # 1. Load the interview object from the file
+#     try:
+#         my_interview = load_interview_from_source(source_type='file', identifier=file_path)
+#         print("\n--- Interview Object Loaded from File ---")
+#         print(my_interview)
+#         print(f"Job Description: {my_interview.jd}")
 
-        # 2. Run the evaluations on the loaded object
-        evaluated_interview = run_evaluations(my_interview)
+#         # 2. Run the evaluations on the loaded object
+#         evaluated_interview = run_evaluations(my_interview)
 
-        # 3. Display the final object with evaluations filled in
-        print("\n--- Interview Object After Evaluation ---")
-        print(evaluated_interview)
-        print(f"Evaluation 1: {evaluated_interview.evaluation_1}")
-        print(f"Evaluation 2: {evaluated_interview.evaluation_2}")
-        print(f"Evaluation 3: {evaluated_interview.evaluation_3}")
+#         # 3. Display the final object with evaluations filled in
+#         print("\n--- Interview Object After Evaluation ---")
+#         print(evaluated_interview)
+#         print(f"Evaluation 1: {evaluated_interview.evaluation_1}")
+#         print(f"Evaluation 2: {evaluated_interview.evaluation_2}")
+#         print(f"Evaluation 3: {evaluated_interview.evaluation_3}")
 
-    except (ValueError, FileNotFoundError) as e:
-        print(f"File workflow failed: {e}")
+#     except (ValueError, FileNotFoundError) as e:
+#         print(f"File workflow failed: {e}")
     
     # Example 2: Using Supabase storage (commented out - requires valid API keys)
     """
