@@ -59,6 +59,13 @@
             border: 2px solid #a5d6a7;
         }
         
+        .button-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
         .connect-btn {
             background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
@@ -69,8 +76,11 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 20px 0;
-            min-width: 200px;
+            min-width: 150px;
+        }
+        
+        .disconnect-btn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
         }
         
         .connect-btn:hover {
@@ -157,9 +167,14 @@
             Desconectado
         </div>
         
-        <button id="connectBtn" class="connect-btn">
-            Conectar
-        </button>
+        <div class="button-container">
+            <button id="connectBtn" class="connect-btn">
+                Conectar
+            </button>
+            <button id="disconnectBtn" class="connect-btn disconnect-btn" style="display: none;">
+                Desconectar
+            </button>
+        </div>
         
         <div id="audioStatus" class="audio-status">
             <div class="audio-indicator">
@@ -176,12 +191,13 @@
 
     <script>
         // Configuración
-        const API_GATEWAY_URL = 'http://localhost:8000';
+        const API_GATEWAY_URL = '';  // Usar el mismo host que el frontend
         const SPEECH_SERVICE_ENDPOINT = '/api/v1/speech';
         
         // Referencias a elementos DOM
         const statusElement = document.getElementById('status');
         const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
         const audioStatus = document.getElementById('audioStatus');
         const remoteAudio = document.getElementById('remoteAudio');
         const logsElement = document.getElementById('logs');
@@ -239,7 +255,8 @@
                     
                     if (peerConnection.connectionState === 'connected') {
                         updateStatus('connected', 'Conectado');
-                        connectBtn.textContent = 'Desconectar';
+                        connectBtn.style.display = 'none';
+                        disconnectBtn.style.display = 'inline-block';
                         isConnected = true;
                     } else if (peerConnection.connectionState === 'disconnected' || 
                               peerConnection.connectionState === 'failed') {
@@ -266,17 +283,30 @@
                 await waitForIceGatheringComplete();
                 addLog(`⏱️ Candidatos ICE recolectados en ${(performance.now() - iceStart).toFixed(1)}ms`);              // Enviar oferta al speech service a través del API Gateway
                 const serverStart = performance.now();
+                console.log('🔗 Enviando solicitud a:', `${API_GATEWAY_URL}${SPEECH_SERVICE_ENDPOINT}/offer`);
+                console.log('📦 Datos a enviar:', {
+                    sdp: peerConnection.localDescription.sdp,
+                    type: peerConnection.localDescription.type,
+                    interview_id: interviewId
+                });
+                
                 const response = await fetch(`${API_GATEWAY_URL}${SPEECH_SERVICE_ENDPOINT}/offer`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        sdp: offer.sdp,
-                        type: offer.type,
+                        sdp: peerConnection.localDescription.sdp,
+                        type: peerConnection.localDescription.type,
                         interview_id: interviewId
                     })
+                }).catch(error => {
+                    console.error('❌ Error en fetch:', error);
+                    throw error;
                 });
+                
+                console.log('📡 Respuesta recibida:', response);
+                console.log('📊 Status:', response.status, response.statusText);
                 addLog(`⏱️ Respuesta del servidor recibida en ${(performance.now() - serverStart).toFixed(1)}ms`);
                 
                 if (!response.ok) {
@@ -334,7 +364,8 @@
         function handleDisconnection() {
             isConnected = false;
             updateStatus('disconnected', 'Desconectado');
-            connectBtn.textContent = 'Conectar';
+            connectBtn.style.display = 'inline-block';
+            disconnectBtn.style.display = 'none';
             connectBtn.disabled = false;
             audioStatus.classList.remove('show');
             
@@ -346,38 +377,33 @@
             addLog('Desconectado del servicio', 'info');
         }
         
-        // Función para conectar/desconectar
-        async function toggleConnection() {
-            if (isConnected) {
-                // Desconectar
+        // Función para conectar
+        async function connectToService() {
+            connectBtn.disabled = true;
+            updateStatus('connecting', 'Conectando...');
+            connectBtn.textContent = 'Conectando...';
+            
+            try {
+                await createWebRTCConnection();
+            } catch (error) {
+                addLog(`Error de conexión: ${error.message}`, 'error');
                 handleDisconnection();
-            } else {
-                // Conectar
-                connectBtn.disabled = true;
-                updateStatus('connecting', 'Conectando...');
-                connectBtn.textContent = 'Conectando...';
-                
-                try {
-                    await createWebRTCConnection();
-                } catch (error) {
-                    addLog(`Error de conexión: ${error.message}`, 'error');
-                    handleDisconnection();
-                }
             }
         }
         
+        // Función para desconectar
+        function disconnectFromService() {
+            addLog('Desconectando por solicitud del usuario...');
+            handleDisconnection();
+        }
+        
         // Event listeners
-        connectBtn.addEventListener('click', toggleConnection);
+        connectBtn.addEventListener('click', connectToService);
+        disconnectBtn.addEventListener('click', disconnectFromService);
         
         // Inicialización
         addLog('Aplicación iniciada');
         addLog(`API Gateway: ${API_GATEWAY_URL}`);
-        
-        // Iniciar conexión automáticamente
-        setTimeout(() => {
-            addLog('Iniciando conexión automática...');
-            toggleConnection();
-        }, 1000);
     </script>
 </body>
 </html>
