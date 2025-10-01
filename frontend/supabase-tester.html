@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Interview Workflow Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .log-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .log-success { background-color: #dcfce7; color: #15803d; border-left: 4px solid #4ade80; }
+        .log-error { background-color: #fee2e2; color: #b91c1c; border-left: 4px solid #f87171; }
+        .log-info { background-color: #e0f2fe; color: #075985; border-left: 4px solid #38bdf8; }
+        label { font-weight: 500; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Supabase Interview Workflow Tester</h1>
+            <p class="text-gray-600 mt-2">A simple dashboard to test the end-to-end interview scheduling and payload generation workflow.</p>
+        </header>
+
+        <!-- Step 1: Configuration -->
+        <div id="config-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">1. Supabase Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="supabase-url" class="block text-sm text-gray-700">Project URL</label>
+                    <input type="text" id="supabase-url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="https://your-project-id.supabase.co">
+                </div>
+                <div>
+                    <label for="supabase-key" class="block text-sm text-gray-700">Anon Key</label>
+                    <input type="text" id="supabase-key" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="your-public-anon-key">
+                </div>
+            </div>
+            <button id="connect-btn" class="mt-4 w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">Connect & Fetch Data</button>
+        </div>
+
+        <!-- Main workflow sections - hidden until connected -->
+        <div id="workflow-sections" class="hidden space-y-6">
+            <!-- Step 2: Create Application -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2">2. Create Application</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="jobs-select" class="block text-sm text-gray-700">Select a Job</label>
+                        <select id="jobs-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></select>
+                    </div>
+                    <div>
+                        <label for="candidates-select" class="block text-sm text-gray-700">Select a Candidate</label>
+                        <select id="candidates-select" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></select>
+                    </div>
+                </div>
+                <button id="create-app-btn" class="mt-4 w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:bg-gray-400" disabled>Create Application & Load Questions</button>
+            </div>
+
+            <!-- Step 3: Build Interview Script -->
+            <div id="interview-builder-section" class="bg-white p-6 rounded-lg shadow-md hidden">
+                <h2 class="text-xl font-semibold mb-4 border-b pb-2">3. Build Interview Script</h2>
+                <p class="text-sm text-gray-600 mb-4">Select questions for this specific interview session. The application ID is <strong id="app-id-display"></strong>.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Job-Specific Technical Questions</h3>
+                        <div id="job-questions-list" class="space-y-2 max-h-60 overflow-y-auto p-2 border rounded-md bg-gray-50"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">General Behavioral Questions</h3>
+                        <div id="behavioral-questions-list" class="space-y-2 max-h-60 overflow-y-auto p-2 border rounded-md bg-gray-50"></div>
+                    </div>
+                </div>
+                 <button id="schedule-interview-btn" class="mt-4 w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700 transition disabled:bg-gray-400" disabled>Schedule Interview & Generate Payload</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Log Output -->
+        <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Activity Log</h2>
+            <div id="log-output" class="space-y-2 max-h-80 overflow-y-auto bg-gray-900 text-white p-4 rounded-md">
+                <div class="log-item log-info">Waiting for actions...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const connectBtn = document.getElementById('connect-btn');
+        const createAppBtn = document.getElementById('create-app-btn');
+        const scheduleInterviewBtn = document.getElementById('schedule-interview-btn');
+        const jobsSelect = document.getElementById('jobs-select');
+        const candidatesSelect = document.getElementById('candidates-select');
+        const logOutput = document.getElementById('log-output');
+        const workflowSections = document.getElementById('workflow-sections');
+        const interviewBuilderSection = document.getElementById('interview-builder-section');
+        const appIdDisplay = document.getElementById('app-id-display');
+        const jobQuestionsList = document.getElementById('job-questions-list');
+        const behavioralQuestionsList = document.getElementById('behavioral-questions-list');
+        const supabaseUrlInput = document.getElementById('supabase-url');
+        const supabaseKeyInput = document.getElementById('supabase-key');
+
+        let supabase = null;
+        let currentApplication = null;
+        
+        // --- LOGGING UTILITY ---
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.textContent = message;
+            div.className = `log-item log-${type}`;
+            logOutput.appendChild(div);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        // --- SUPABASE CONNECTION ---
+        connectBtn.addEventListener('click', async () => {
+            const url = supabaseUrlInput.value.trim();
+            const key = supabaseKeyInput.value.trim();
+
+            if (!url || !key) {
+                log('Supabase URL and Anon Key are required.', 'error');
+                return;
+            }
+
+            try {
+                supabase = supabase.createClient(url, key);
+                log('Successfully connected to Supabase.', 'success');
+                
+                // Fetch initial data
+                await Promise.all([fetchJobs(), fetchCandidates()]);
+                
+                workflowSections.classList.remove('hidden');
+                createAppBtn.disabled = false;
+            } catch (error) {
+                log(`Connection failed: ${error.message}`, 'error');
+                supabase = null;
+            }
+        });
+
+        // --- DATA FETCHING ---
+        async function fetchJobs() {
+            log('Fetching jobs...');
+            const { data, error } = await supabase.from('jobs').select('job_id, title');
+            if (error) {
+                log(`Error fetching jobs: ${error.message}`, 'error');
+                return;
+            }
+            jobsSelect.innerHTML = data.map(job => `<option value="${job.job_id}">${job.title}</option>`).join('');
+            log(`Loaded ${data.length} jobs.`, 'success');
+        }
+
+        async function fetchCandidates() {
+            log('Fetching candidates...');
+            const { data, error } = await supabase.from('candidates').select('candidate_id, first_name, last_name');
+            if (error) {
+                log(`Error fetching candidates: ${error.message}`, 'error');
+                return;
+            }
+            candidatesSelect.innerHTML = data.map(c => `<option value="${c.candidate_id}">${c.first_name} ${c.last_name}</option>`).join('');
+            log(`Loaded ${data.length} candidates.`, 'success');
+        }
+
+        // --- WORKFLOW STEP 1: CREATE APPLICATION ---
+        createAppBtn.addEventListener('click', async () => {
+            const jobId = jobsSelect.value;
+            const candidateId = candidatesSelect.value;
+            
+            log(`Attempting to create application for job ${jobId.substring(0,8)}... and candidate ${candidateId.substring(0,8)}...`);
+
+            // Upsert logic: find existing or create new
+            let { data: existing, error: selectError } = await supabase
+                .from('applications')
+                .select('application_id, job_id, candidate_id')
+                .eq('job_id', jobId)
+                .eq('candidate_id', candidateId)
+                .single();
+
+            if (selectError && selectError.code !== 'PGRST116') { // PGRST116 = not found, which is fine
+                 log(`Error checking for existing application: ${selectError.message}`, 'error');
+                 return;
+            }
+
+            if (existing) {
+                currentApplication = existing;
+                log(`Found existing application: ${currentApplication.application_id}`, 'success');
+            } else {
+                const { data, error } = await supabase
+                    .from('applications')
+                    .insert({ job_id: jobId, candidate_id: candidateId })
+                    .select()
+                    .single();
+
+                if (error) {
+                    log(`Error creating application: ${error.message}`, 'error');
+                    return;
+                }
+                currentApplication = data;
+                log(`Successfully created new application: ${currentApplication.application_id}`, 'success');
+            }
+            
+            appIdDisplay.textContent = currentApplication.application_id;
+            interviewBuilderSection.classList.remove('hidden');
+            await loadQuestionPools(currentApplication.job_id);
+            scheduleInterviewBtn.disabled = false;
+        });
+
+        // --- WORKFLOW STEP 2: LOAD QUESTION POOLS ---
+        async function loadQuestionPools(jobId) {
+            log(`Loading question pools for job ${jobId.substring(0,8)}...`);
+            
+            // Fetch job-specific questions
+            const { data: jobQuestions, error: jqError } = await supabase
+                .from('job_questions')
+                .select('questions(question_id, text)')
+                .eq('job_id', jobId);
+
+            if (jqError) {
+                log(`Error fetching job questions: ${jqError.message}`, 'error');
+            } else {
+                jobQuestionsList.innerHTML = jobQuestions.map(jq => createQuestionCheckbox(jq.questions)).join('');
+                log(`Loaded ${jobQuestions.length} job-specific questions.`, 'info');
+            }
+
+            // Fetch behavioral questions
+            const { data: behavioralQuestions, error: bqError } = await supabase
+                .from('questions')
+                .select('question_id, text')
+                .eq('category', 'Behavioral');
+
+             if (bqError) {
+                log(`Error fetching behavioral questions: ${bqError.message}`, 'error');
+            } else {
+                behavioralQuestionsList.innerHTML = behavioralQuestions.map(createQuestionCheckbox).join('');
+                log(`Loaded ${behavioralQuestions.length} behavioral questions.`, 'info');
+            }
+        }
+        
+        function createQuestionCheckbox(question) {
+             return `
+                <div class="flex items-start">
+                    <input type="checkbox" id="q-${question.question_id}" value="${question.question_id}" data-text="${CSS.escape(question.text)}" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1">
+                    <label for="q-${question.question_id}" class="ml-2 text-sm text-gray-700">${question.text}</label>
+                </div>
+            `;
+        }
+
+        // --- WORKFLOW STEP 3: SCHEDULE INTERVIEW (The "Edge Function" Logic) ---
+        scheduleInterviewBtn.addEventListener('click', async () => {
+            scheduleInterviewBtn.disabled = true;
+            scheduleInterviewBtn.textContent = 'Scheduling...';
+            log('Starting interview scheduling process...');
+            
+            const selectedQuestions = Array.from(document.querySelectorAll('#interview-builder-section input[type="checkbox"]:checked'));
+            if (selectedQuestions.length === 0) {
+                log('Please select at least one question.', 'error');
+                scheduleInterviewBtn.disabled = false;
+                scheduleInterviewBtn.textContent = 'Schedule Interview & Generate Payload';
+                return;
+            }
+
+            try {
+                // 1. Create the Interview record
+                log('Step 1: Creating interview record...');
+                // You might need to add default prompt/rubric versions here if your table requires them
+                const { data: interview, error: interviewError } = await supabase
+                    .from('interviews')
+                    .insert({ application_id: currentApplication.application_id }) 
+                    .select()
+                    .single();
+                
+                if (interviewError) throw new Error(`Creating interview record failed: ${interviewError.message}`);
+                const newInterviewId = interview.interview_id;
+                log(` -> Success. New interview ID: ${newInterviewId}`, 'success');
+
+                // 2. Build the Interview Script
+                log('Step 2: Building interview script...');
+                const scriptToInsert = selectedQuestions.map((checkbox, index) => ({
+                    interview_id: newInterviewId,
+                    question_id: checkbox.value,
+                    position: index + 1,
+                    asked_text: checkbox.dataset.text // Retrieve stored text
+                }));
+                
+                const { error: scriptError } = await supabase
+                    .from('interview_questions')
+                    .insert(scriptToInsert);
+
+                if (scriptError) throw new Error(`Building script failed: ${scriptError.message}`);
+                log(` -> Success. Inserted ${scriptToInsert.length} questions into script.`, 'success');
+
+                // 3. Call the Payload Generation Function
+                log('Step 3: Calling RPC to generate payload...');
+                const { error: rpcError } = await supabase.rpc('generate_interview_payload', {
+                    p_interview_id: newInterviewId
+                });
+
+                if (rpcError) throw new Error(`RPC call failed: ${rpcError.message}`);
+                log(` -> Success. Payload generated and queued.`, 'success');
+                
+                log('Workflow complete! Check the interviewer_queue table in Supabase.', 'success');
+
+            } catch (error) {
+                log(`Workflow failed: ${error.message}`, 'error');
+            } finally {
+                scheduleInterviewBtn.disabled = false;
+                scheduleInterviewBtn.textContent = 'Schedule Interview & Generate Payload';
+            }
+        });
+
+    </script>
+</body>
+</html>
