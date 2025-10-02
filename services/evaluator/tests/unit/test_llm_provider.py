@@ -5,7 +5,7 @@ Tests the core LLM API calling functions with mocked responses.
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
-from app.infrastructure.llm_provider import (
+from services.evaluator.app.helpers import (
     call_openai_gpt5,
     call_google_gemini,
     call_openrouter_deepseek,

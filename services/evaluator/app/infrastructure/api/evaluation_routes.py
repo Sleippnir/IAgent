@@ -1,190 +1,229 @@
 """
-Evaluation endpoints - migrated from evaluation-reporting service
-These endpoints handle interview evaluation results and statistics
+API routes for interview evaluation using LLM providers.
 """
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse
-from pydantic import BaseModel
-from typing import Dict, List, Optional, Union, Literal
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from typing import List
 from datetime import datetime
 
-router = APIRouter(prefix="/api/v1/evaluation", tags=["evaluation"])
+from ...domain.entities.interview import Interview
+from ...infrastructure.config import get_settings
+from ...infrastructure.persistence.supabase.interview_repository import InterviewRepository
+from ...helpers import run_evaluations, load_interview_from_source
+from ..api.models import (
+    EvaluationRequest,
+    EvaluationResponse,
+    InterviewResponse,
+    LLMProvider,
+    ErrorResponse
+)
+from .routes import interview_to_response
 
-# Structured evaluation models based on rubric schema
-class CriterionScore(BaseModel):
-    score: Literal["very_weak", "weak", "strong", "very_strong"]
-    rationale: str
-    evidence: List[str]
+router = APIRouter(prefix="/api/v1", tags=["evaluation"])
 
-class TechnicalEvaluation(BaseModel):
-    problem_understanding: CriterionScore
-    technical_skills: CriterionScore
-    rationale: CriterionScore
-    communication: CriterionScore
+# Dependency to get repository
+def get_interview_repository():
+    return InterviewRepository()
 
-class BehavioralEvaluation(BaseModel):
-    question_understanding: CriterionScore
-    experience_competence: CriterionScore
-    self_awareness: CriterionScore
-    communication: CriterionScore
 
-class OverallAssessment(BaseModel):
-    quantitative_score: float  # 0-100
-    score_calculation: str
-    recommendation: Literal["strong_hire", "hire", "no_hire", "strong_no_hire"]
-    key_strengths: List[str]
-    areas_for_improvement: List[str]
-    summary: str
-
-class EvaluationMetadata(BaseModel):
-    evaluator: str
-    evaluation_timestamp: datetime
-    rubric_version: str
-
-class StructuredEvaluationResponse(BaseModel):
-    """Structured evaluation response following the rubric schema"""
-    interview_type: Literal["technical", "behavioral"]
-    technical_evaluation: Optional[TechnicalEvaluation] = None
-    behavioral_evaluation: Optional[BehavioralEvaluation] = None
-    overall_assessment: OverallAssessment
-    metadata: EvaluationMetadata
-
-# Experimental models for mixed interviews (testing only)
-class CriterionScoreExtended(BaseModel):
-    score: Literal["very_weak", "weak", "strong", "very_strong", "not_applicable"]
-    rationale: str
-    evidence: List[str]
-
-class MixedEvaluationResponse(BaseModel):
-    """EXPERIMENTAL: Mixed interview evaluation response"""
-    interview_type: Literal["technical", "behavioral", "mixed"]
-    technical_evaluation: Optional[dict] = None  # Flexible for testing
-    behavioral_evaluation: Optional[dict] = None  # Flexible for testing
-    overall_assessment: dict  # Flexible for testing
-    metadata: dict  # Flexible for testing
-
-# Real response models based on actual Interview entity structure
-class InterviewEvaluationResponse(BaseModel):
-    """Response model for interview evaluation results - based on actual Interview entity"""
-    interview_id: Optional[str]
-    system_prompt: str
-    rubric: str
-    jd: str
-    full_transcript: str
-    evaluation_1: Optional[str] = None  # OpenAI evaluation text
-    evaluation_2: Optional[str] = None  # Gemini evaluation text  
-    evaluation_3: Optional[str] = None  # DeepSeek evaluation text
-
-class ExportRequest(BaseModel):
-    interview_id: str
-    format: str = "pdf"
-    language: str = "es"
-
-# Evaluation Results Endpoints
-@router.get("/results/interview/{interview_id}", response_model=InterviewEvaluationResponse)
-async def get_interview_results(interview_id: str):
-    """Get evaluation results for a specific interview"""
-    from ...infrastructure.llm_provider import load_interview_from_source
-    
-    try:
-        # Load interview from file (this is what actually exists)
-        # In a real system, this would load from database
-        interview = load_interview_from_source("file", f"{interview_id}.json")
-        
-        return InterviewEvaluationResponse(
-            interview_id=interview.interview_id,
-            system_prompt=interview.system_prompt,
-            rubric=interview.rubric,
-            jd=interview.jd,
-            full_transcript=interview.full_transcript,
-            evaluation_1=interview.evaluation_1,
-            evaluation_2=interview.evaluation_2,
-            evaluation_3=interview.evaluation_3
-        )
-    except Exception as e:
-        # If file doesn't exist, return a default interview structure
-        # This shows what the system actually works with
-        from ...domain.entities.interview import Interview
-        default_interview = Interview(interview_id=interview_id)
-        
-        return InterviewEvaluationResponse(
-            interview_id=default_interview.interview_id,
-            system_prompt=default_interview.system_prompt,
-            rubric=default_interview.rubric,
-            jd=default_interview.jd,
-            full_transcript=default_interview.full_transcript,
-            evaluation_1=default_interview.evaluation_1,
-            evaluation_2=default_interview.evaluation_2,
-            evaluation_3=default_interview.evaluation_3
-        )
-
-# Structured Evaluation Endpoint - Returns rubric-based evaluation
-@router.get("/structured/{interview_id}", response_model=StructuredEvaluationResponse)
-async def get_structured_evaluation(interview_id: str):
-    """Get structured rubric-based evaluation for a specific interview"""
-    from ...infrastructure.llm_provider import load_interview_from_source, get_structured_evaluation
-    
-    try:
-        # Load interview from file (this is what actually exists)
-        interview = load_interview_from_source("file", f"{interview_id}.json")
-        
-        # Get structured evaluation using the rubric schema
-        structured_evaluation = await get_structured_evaluation(interview)
-        
-        return structured_evaluation
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Could not generate structured evaluation for interview {interview_id}: {str(e)}"
-        )
-
-# EXPERIMENTAL: Mixed Interview Evaluation Endpoint (for testing custom prompts/schemas)
-@router.post("/experimental/mixed/{interview_id}", response_model=MixedEvaluationResponse)
-async def get_mixed_evaluation_experimental(
-    interview_id: str,
-    custom_prompt: Optional[str] = None,
-    custom_schema: Optional[dict] = None
+@router.post("/evaluate", response_model=InterviewResponse)
+async def evaluate_interview(
+    request: EvaluationRequest,
+    background_tasks: BackgroundTasks,
+    repository: InterviewRepository = Depends(get_interview_repository)
 ):
     """
-    EXPERIMENTAL: Get mixed interview evaluation with custom prompts/schemas
-    This endpoint allows testing different prompt strategies without affecting main logic
+    Evaluate an interview using LLM providers.
+    This endpoint triggers the evaluation process and returns the updated interview.
     """
-    from ...infrastructure.llm_provider import load_interview_from_source, get_mixed_evaluation_experimental
-    
+    try:
+        # Get the interview from repository
+        interview = await repository.get_by_id(request.interview_id)
+        
+        if not interview:
+            raise HTTPException(status_code=404, detail="Interview not found")
+        
+        # Run evaluations (this calls all LLM providers)
+        evaluated_interview = await run_evaluations(interview)
+        
+        # Save the updated interview with evaluations
+        updated_interview = await repository.update(evaluated_interview)
+        
+        return interview_to_response(updated_interview)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to evaluate interview: {str(e)}")
+
+
+@router.post("/evaluate/file", response_model=InterviewResponse)
+async def evaluate_interview_from_file(
+    file_path: str,
+    background_tasks: BackgroundTasks,
+    save_to_db: bool = True,
+    repository: InterviewRepository = Depends(get_interview_repository)
+):
+    """
+    Load an interview from a file and evaluate it.
+    Optionally save the results to the database.
+    """
     try:
         # Load interview from file
-        interview = load_interview_from_source("file", f"{interview_id}.json")
+        interview = load_interview_from_source('file', file_path)
         
-        # Use experimental function with custom parameters
-        experimental_evaluation = await get_mixed_evaluation_experimental(
-            interview, 
-            custom_prompt=custom_prompt,
-            custom_schema=custom_schema
-        )
+        # Run evaluations
+        evaluated_interview = await run_evaluations(interview)
         
-        return experimental_evaluation
+        # Save to database if requested
+        if save_to_db:
+            # Check if interview already exists
+            existing = await repository.get_by_id(evaluated_interview.interview_id) if evaluated_interview.interview_id else None
+            
+            if existing:
+                updated_interview = await repository.update(evaluated_interview)
+            else:
+                updated_interview = await repository.create(evaluated_interview)
+        else:
+            updated_interview = evaluated_interview
+        
+        return interview_to_response(updated_interview)
+        
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Interview file not found: {file_path}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to evaluate interview from file: {str(e)}")
+
+
+@router.get("/evaluate/status/{interview_id}")
+async def get_evaluation_status(
+    interview_id: str,
+    repository: InterviewRepository = Depends(get_interview_repository)
+):
+    """
+    Get the evaluation status of an interview.
+    Returns which evaluations have been completed.
+    """
+    try:
+        interview = await repository.get_by_id(interview_id)
+        
+        if not interview:
+            raise HTTPException(status_code=404, detail="Interview not found")
+        
+        return {
+            "interview_id": interview_id,
+            "evaluations": {
+                "openai_gpt5": {
+                    "completed": interview.evaluation_1 is not None,
+                    "provider": "OpenAI GPT-5",
+                    "has_content": bool(interview.evaluation_1)
+                },
+                "google_gemini": {
+                    "completed": interview.evaluation_2 is not None,
+                    "provider": "Google Gemini",
+                    "has_content": bool(interview.evaluation_2)
+                },
+                "deepseek": {
+                    "completed": interview.evaluation_3 is not None,
+                    "provider": "DeepSeek via OpenRouter",
+                    "has_content": bool(interview.evaluation_3)
+                }
+            },
+            "total_completed": sum([
+                1 for eval in [interview.evaluation_1, interview.evaluation_2, interview.evaluation_3]
+                if eval is not None
+            ]),
+            "all_completed": all([
+                interview.evaluation_1 is not None,
+                interview.evaluation_2 is not None,
+                interview.evaluation_3 is not None
+            ])
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get evaluation status: {str(e)}")
+
+
+@router.post("/evaluate/batch")
+async def evaluate_interviews_batch(
+    interview_ids: List[str],
+    background_tasks: BackgroundTasks,
+    repository: InterviewRepository = Depends(get_interview_repository)
+):
+    """
+    Evaluate multiple interviews in batch.
+    This is an async operation that runs in the background.
+    """
+    try:
+        settings = get_settings()
+        
+        # Validate interview IDs exist
+        valid_interviews = []
+        for interview_id in interview_ids:
+            interview = await repository.get_by_id(interview_id)
+            if interview:
+                valid_interviews.append(interview)
+        
+        if not valid_interviews:
+            raise HTTPException(status_code=404, detail="No valid interviews found")
+        
+        # Add batch evaluation task to background
+        async def batch_evaluation_task():
+            """Background task for batch evaluation"""
+            for interview in valid_interviews:
+                try:
+                    evaluated_interview = await run_evaluations(interview)
+                    await repository.update(evaluated_interview)
+                except Exception as e:
+                    print(f"Failed to evaluate interview {interview.interview_id}: {e}")
+        
+        background_tasks.add_task(batch_evaluation_task)
+        
+        return {
+            "message": f"Batch evaluation started for {len(valid_interviews)} interviews",
+            "interview_ids": [i.interview_id for i in valid_interviews],
+            "status": "processing"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to start batch evaluation: {str(e)}")
+
+
+@router.get("/providers")
+async def get_available_providers():
+    """Get information about available LLM providers and their status"""
+    try:
+        settings = get_settings()
+        
+        providers = {
+            "openai": {
+                "name": "OpenAI GPT-5",
+                "model": settings.OPENAI_MODEL,
+                "available": bool(settings.OPENAI_API_KEY),
+                "description": "OpenAI's latest GPT model"
+            },
+            "gemini": {
+                "name": "Google Gemini",
+                "model": settings.GEMINI_MODEL,
+                "available": bool(settings.GOOGLE_API_KEY),
+                "description": "Google's Gemini model"
+            },
+            "deepseek": {
+                "name": "DeepSeek via OpenRouter",
+                "model": settings.DEEPSEEK_MODEL,
+                "available": bool(settings.OPENROUTER_API_KEY),
+                "description": "DeepSeek model accessed through OpenRouter"
+            }
+        }
+        
+        return {
+            "providers": providers,
+            "total_available": sum(1 for p in providers.values() if p["available"]),
+            "evaluation_enabled": settings.ENABLE_MULTIPLE_EVALUATIONS
+        }
         
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Experimental evaluation failed for interview {interview_id}: {str(e)}"
-        )
-
-# Export Endpoint - Only supports JSON export since that's what actually exists
-@router.post("/export/{interview_id}")
-async def export_interview(
-    interview_id: str,
-    request: ExportRequest,
-    background_tasks: BackgroundTasks
-):
-    """Export interview evaluation in supported formats"""
-    if request.format == "json":
-        # Return the actual interview data as JSON
-        interview_data = await get_interview_results(interview_id)
-        return interview_data
-    else:
-        raise HTTPException(
-            status_code=501, 
-            detail=f"Export format '{request.format}' not implemented. Only 'json' is currently supported."
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to get provider information: {str(e)}")

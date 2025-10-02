@@ -7,7 +7,7 @@ import json
 import tempfile
 import os
 from unittest.mock import patch
-from app.infrastructure.llm_provider import (
+from services.evaluator.app.helpers import (
     load_interview_from_source,
     run_evaluations
 )

@@ -8,11 +8,11 @@ sys.path.insert(0, '.')
 async def test_all_providers():
     """Test all LLM providers to ensure they're working correctly."""
     from app.infrastructure.config import Settings
-    from app.infrastructure.llm_provider import call_openai_gpt5, call_google_gemini, call_openrouter_deepseek
-    import app.infrastructure.llm_provider as llm_provider
+    from services.evaluator.app.helpers import call_openai_gpt5, call_google_gemini, call_openrouter_deepseek
+    import services.evaluator.app.helpers as helpers
     
     settings = Settings()
-    llm_provider.settings = settings
+    helpers.settings = settings
     
     # Test data
     PROMPT = "You are a technical interviewer evaluating a Python developer."

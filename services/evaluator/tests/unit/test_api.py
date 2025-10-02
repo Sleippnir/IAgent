@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
 import asyncio
-from app.infrastructure.llm_provider import call_openai_gpt5
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from app.helpers import call_openai_gpt5
 
 async def test_api():
     try:

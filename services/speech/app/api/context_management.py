@@ -3,7 +3,7 @@ from typing import Dict, Any, Optional, List
 import logging
 from ..services.context_system_service import ContextService as IntelligentContextService
 # from ..services.redis_context_cache import get_redis_context_cache
-from ..infrastructure.repositories.interview_repository import SupabaseInterviewRepository
+from ..infrastructure.repositories.supabase_queries import SupabaseInterviewRepository
 # from ..services.context_service import ContextService
 
 logger = logging.getLogger(__name__)

@@ -1,211 +1,195 @@
+"""
+Main API routes for the LLM Interview Evaluation Service.
+"""
 from fastapi import APIRouter, HTTPException, Depends
-from typing import Annotated
+from typing import List, Optional
+from datetime import datetime
 
-from ...domain.models import GenerateRequest, GenerateResponse, ModelType
-from ...application.use_cases import GenerateTextUseCase, LLMProviderPort
-from ..llm_provider import call_openai_gpt5, call_google_gemini, call_openrouter_deepseek
+from ...domain.entities.interview import Interview
+from ...infrastructure.config import get_settings
+from ...infrastructure.persistence.supabase.interview_repository import InterviewRepository
+from ..api.models import (
+    InterviewCreateRequest,
+    InterviewUpdateRequest,
+    InterviewResponse,
+    ListInterviewsResponse,
+    ErrorResponse
+)
+
+router = APIRouter(prefix="/api/v1", tags=["interviews"])
+
+# Dependency to get repository
+def get_interview_repository():
+    return InterviewRepository()
+
+# Helper function to convert domain entity to API response
+def interview_to_response(interview: Interview) -> InterviewResponse:
+    """Convert Interview domain entity to API response model"""
+    return InterviewResponse(
+        interview_id=interview.interview_id,
+        system_prompt=interview.system_prompt,
+        rubric=interview.rubric,
+        jd=interview.jd,
+        full_transcript=interview.full_transcript,
+        evaluation_1=interview.evaluation_1,
+        evaluation_2=interview.evaluation_2,
+        evaluation_3=interview.evaluation_3,
+        created_at=datetime.now(),
+        updated_at=datetime.now()
+    )
+
+# Helper function to convert API request to domain entity
+def request_to_interview(request: InterviewCreateRequest) -> Interview:
+    """Convert API request to Interview domain entity"""
+    return Interview(
+        interview_id=request.interview_id,
+        system_prompt=request.system_prompt,
+        rubric=request.rubric,
+        jd=request.jd,
+        full_transcript=request.full_transcript
+    )
 
 
-router = APIRouter(prefix="/api/v1")
+@router.post("/interviews", response_model=InterviewResponse, status_code=201)
+async def create_interview(
+    request: InterviewCreateRequest,
+    repository: InterviewRepository = Depends(get_interview_repository)
+):
+    """Create a new interview record"""
+    try:
+        # Convert request to domain entity
+        interview = request_to_interview(request)
+        
+        # Save to repository
+        created_interview = await repository.create(interview)
+        
+        # Convert back to response model
+        return interview_to_response(created_interview)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create interview: {str(e)}")
 
 
+@router.get("/interviews/{interview_id}", response_model=InterviewResponse)
+async def get_interview(
+    interview_id: str,
+    repository: InterviewRepository = Depends(get_interview_repository)
+):
+    """Get a specific interview by ID"""
+    try:
+        interview = await repository.get_by_id(interview_id)
+        
+        if not interview:
+            raise HTTPException(status_code=404, detail="Interview not found")
+            
+        return interview_to_response(interview)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve interview: {str(e)}")
+
+
+@router.put("/interviews/{interview_id}", response_model=InterviewResponse)
+async def update_interview(
+    interview_id: str,
+    request: InterviewUpdateRequest,
+    repository: InterviewRepository = Depends(get_interview_repository)
+):
+    """Update an existing interview"""
+    try:
+        # First, get the existing interview
+        existing_interview = await repository.get_by_id(interview_id)
+        
+        if not existing_interview:
+            raise HTTPException(status_code=404, detail="Interview not found")
+        
+        # Update only provided fields
+        if request.system_prompt is not None:
+            existing_interview.system_prompt = request.system_prompt
+        if request.rubric is not None:
+            existing_interview.rubric = request.rubric
+        if request.jd is not None:
+            existing_interview.jd = request.jd
+        if request.full_transcript is not None:
+            existing_interview.full_transcript = request.full_transcript
+            
+        # Save updated interview
+        updated_interview = await repository.update(existing_interview)
+        
+        return interview_to_response(updated_interview)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update interview: {str(e)}")
+
+
+@router.delete("/interviews/{interview_id}", status_code=204)
+async def delete_interview(
+    interview_id: str,
+    repository: InterviewRepository = Depends(get_interview_repository)
+):
+    """Delete an interview"""
+    try:
+        success = await repository.delete(interview_id)
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="Interview not found")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete interview: {str(e)}")
+
+
+@router.get("/interviews", response_model=ListInterviewsResponse)
+async def list_interviews(
+    page: int = 1,
+    per_page: int = 10,
+    has_evaluations: Optional[bool] = None,
+    repository: InterviewRepository = Depends(get_interview_repository)
+):
+    """List interviews with optional filtering"""
+    try:
+        if per_page > 100:
+            per_page = 100
+        if per_page < 1:
+            per_page = 1
+        if page < 1:
+            page = 1
+            
+        offset = (page - 1) * per_page
+        
+        if has_evaluations is not None:
+            interviews = await repository.get_by_status(has_evaluations=has_evaluations)
+            # Apply pagination manually for filtered results
+            total = len(interviews)
+            interviews = interviews[offset:offset + per_page]
+        else:
+            interviews = await repository.list_all(limit=per_page, offset=offset)
+            # For simplicity, we'll use the returned count as total
+            # In a real implementation, you'd want a separate count query
+            total = len(interviews) + offset
+        
+        interview_responses = [interview_to_response(interview) for interview in interviews]
+        
+        return ListInterviewsResponse(
+            interviews=interview_responses,
+            total=total,
+            page=page,
+            per_page=per_page
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to list interviews: {str(e)}")
+
+
+# Mock LLM Provider for testing (referenced in tests)
 class RealLLMProvider:
-    """Real LLM provider that uses the actual implementations"""
+    """Mock LLM provider for testing purposes"""
     
-    async def generate_text(
-        self, 
-        prompt: str, 
-        model: ModelType, 
-        max_tokens: int, 
-        temperature: float
-    ) -> str:
-        """Generate text using real LLM providers"""
-        try:
-            # The existing functions expect prompt, rubric, transcript
-            # For general text generation, we'll use the prompt as the main content
-            # and empty strings for rubric and transcript
-            if model == ModelType.GPT_4:
-                return await call_openai_gpt5(prompt, "", "")
-            elif model == ModelType.CLAUDE:
-                return await call_google_gemini(prompt, "", "")
-            elif model == ModelType.LLAMA:
-                return await call_openrouter_deepseek(prompt, "", "")
-            else:
-                # Default to GPT-4
-                return await call_openai_gpt5(prompt, "", "")
-        except Exception as e:
-            return f"Error generating text: {str(e)}"
-    
-    def get_model_info(self, model: ModelType) -> dict:
-        """Get information about the model"""
-        model_info = {
-            ModelType.GPT_4: {
-                "name": "GPT-5",
-                "provider": "OpenAI",
-                "max_tokens": 4000,
-                "context_window": 128000
-            },
-            ModelType.CLAUDE: {
-                "name": "Gemini 2.5 Pro",
-                "provider": "Google",
-                "max_tokens": 2048,
-                "context_window": 32000
-            },
-            ModelType.LLAMA: {
-                "name": "DeepSeek Chat v3.1",
-                "provider": "DeepSeek via OpenRouter",
-                "max_tokens": 4000,
-                "context_window": 32000
-            }
-        }
-        return model_info.get(model, {"name": "Unknown", "provider": "Unknown", "max_tokens": 0, "context_window": 0})
-
-
-def get_llm_provider() -> RealLLMProvider:
-    """Dependency injection for real LLM provider"""
-    return RealLLMProvider()
-
-
-def get_generate_use_case(
-    llm_provider: Annotated[RealLLMProvider, Depends(get_llm_provider)]
-) -> GenerateTextUseCase:
-    """Dependency injection for text generation use case"""
-    return GenerateTextUseCase(llm_provider)
-
-
-@router.post("/generate", response_model=GenerateResponse)
-async def generate_text(
-    request: GenerateRequest,
-    use_case: Annotated[GenerateTextUseCase, Depends(get_generate_use_case)]
-):
-    """Endpoint para generar texto usando LLM"""
-    try:
-        return await use_case.execute(request)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Internal LLM service error: {str(e)}"
-        )
-
-
-@router.get("/models")
-async def list_models(
-    llm_provider: Annotated[RealLLMProvider, Depends(get_llm_provider)]
-):
-    """List available models"""
-    from ...domain.models import ModelType
-    
-    models = []
-    for model_type in ModelType:
-        model_info = llm_provider.get_model_info(model_type)
-        models.append({
-            "id": model_type.value,
-            "name": model_info.get("name", model_type.value),
-            "provider": model_info.get("provider", "Unknown"),
-            "max_tokens": model_info.get("max_tokens", 0),
-            "context_window": model_info.get("context_window", 0)
-        })
-    
-    return {"models": models}
-
-# Note: Interview evaluation endpoints have been moved to evaluation_routes.py
-
-
-# Interview evaluation endpoints
-from pydantic import BaseModel
-from typing import Optional
-
-
-class InterviewRequest(BaseModel):
-    """Request model for interview evaluation"""
-    interview_id: str
-    system_prompt: Optional[str] = None
-    rubric: Optional[str] = None
-    jd: Optional[str] = None
-    full_transcript: str
-
-
-class InterviewResponse(BaseModel):
-    """Response model for interview evaluation"""
-    interview_id: str
-    evaluation_1: Optional[str] = None
-    evaluation_2: Optional[str] = None
-    evaluation_3: Optional[str] = None
-    error: Optional[str] = None
-
-
-@router.post("/evaluate-interview", response_model=InterviewResponse)
-async def evaluate_interview(request: InterviewRequest):
-    """Evaluate an interview using multiple LLM providers"""
-    try:
-        from ...domain.entities.interview import Interview
-        
-        # Create Interview object
-        interview = Interview(
-            interview_id=request.interview_id,
-            system_prompt=request.system_prompt,
-            rubric=request.rubric,
-            jd=request.jd,
-            full_transcript=request.full_transcript
-        )
-        
-        # Run evaluations using the existing functions
-        try:
-            interview.evaluation_1 = await call_openai_gpt5(
-                interview.system_prompt, interview.rubric, interview.full_transcript
-            )
-        except Exception as e:
-            interview.evaluation_1 = f"OpenAI evaluation failed: {str(e)}"
-        
-        try:
-            interview.evaluation_2 = await call_google_gemini(
-                interview.system_prompt, interview.rubric, interview.full_transcript
-            )
-        except Exception as e:
-            interview.evaluation_2 = f"Gemini evaluation failed: {str(e)}"
-        
-        try:
-            interview.evaluation_3 = await call_openrouter_deepseek(
-                interview.system_prompt, interview.rubric, interview.full_transcript
-            )
-        except Exception as e:
-            interview.evaluation_3 = f"DeepSeek evaluation failed: {str(e)}"
-        
-        return InterviewResponse(
-            interview_id=interview.interview_id,
-            evaluation_1=interview.evaluation_1,
-            evaluation_2=interview.evaluation_2,
-            evaluation_3=interview.evaluation_3
-        )
-        
-    except Exception as e:
-        return InterviewResponse(
-            interview_id=request.interview_id,
-            error=f"Interview evaluation failed: {str(e)}"
-        )
-
-
-@router.post("/evaluate-interview-file")
-async def evaluate_interview_from_file(file_path: str, source_type: str = "file"):
-    """Evaluate an interview loaded from file or database"""
-    try:
-        from ..llm_provider import load_interview_from_source, run_evaluations
-        
-        # Load interview from source
-        interview = load_interview_from_source(source_type, file_path)
-        
-        # Run evaluations - now properly awaited
-        evaluated_interview = await run_evaluations(interview)
-        
-        return {
-            "interview_id": evaluated_interview.interview_id,
-            "evaluation_1": evaluated_interview.evaluation_1,
-            "evaluation_2": evaluated_interview.evaluation_2,
-            "evaluation_3": evaluated_interview.evaluation_3
-        }
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to evaluate interview from {source_type}: {str(e)}"
-        )
+    async def generate_text(self, prompt: str, model: str, max_tokens: int, temperature: float) -> str:
+        """Generate text using specified model"""
+        # This is a mock implementation for testing
+        return f"Generated response for model {model} with prompt: {prompt[:50]}..."
