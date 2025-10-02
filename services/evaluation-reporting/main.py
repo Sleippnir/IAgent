@@ -1,5 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde el .env principal primero
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+# Luego cargar variables locales del servicio (si existen)
+load_dotenv()
 
 app = FastAPI(title="Evaluation & Reporting Service")
 
@@ -142,9 +150,15 @@ async def startup_event():
     pass
 
 if __name__ == "__main__":
+    # Obtener configuración desde variables de entorno
+    host = os.getenv("EVALUATION_SERVICE_HOST", os.getenv("EVALUATION_HOST", "0.0.0.0"))
+    port = int(os.getenv("EVALUATION_SERVICE_PORT", os.getenv("EVALUATION_PORT", "8005")))
+    
+    print(f"Iniciando Evaluation Service en {host}:{port}")
+    
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
-        port=8005,
+        host=host,
+        port=port,
         reload=True
     )

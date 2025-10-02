@@ -5,21 +5,29 @@ fastapi>=0.104.1
 # Servidor ASGI para producción
 uvicorn[standard]>=0.24.0
 
-# Cliente HTTP asíncrono - versión compatible con supabase
-httpx>=0.26,<0.28
+# Cliente HTTP asíncrono
+httpx>=0.25.2
+aiohttp>=3.9.1
 
 # Validación de datos
-pydantic>=2.10.6
+pydantic>=2.5.0
 
-# Supabase client - versiones específicas para evitar error de proxy
-supabase==2.10.0
-gotrue>=2.10.0
+# Logging estructurado (opcional)
+structlog>=23.2.0
+
+# Supabase client
+supabase>=2.6.0
 
 # Variables de entorno
-python-dotenv==1.0.0
+python-dotenv>=1.0.0
+
+# Manejo de archivos asíncronos
+aiofiles>=23.2.1
+
+# Procesamiento de media
+pillow>=10.1.0
 
 # Redis client
-redis==5.0.1
 redis>=5.0.1
 
 # PostgreSQL async driver
@@ -41,21 +49,9 @@ python-Levenshtein>=0.23.0
 textblob>=0.17.1
 
 # Pipecat AI framework para conversaciones multimodales
-pipecat-ai==0.0.85
-onnxruntime>=1.16.0
-transformers>=4.30.0
-
-# WebRTC para comunicación en tiempo real
-aiortc==1.9.0
 pipecat-ai>=0.0.85
 
 # Google AI y Cloud Services
-google-genai==0.8.0
-google-cloud-speech==2.33.0
-google-cloud-texttospeech==2.30.0
-
-# Logging
-loguru>=0.7.0
 google-genai>=0.8.0
 google-cloud-speech>=2.33.0
 google-cloud-texttospeech>=2.30.0
@@ -64,4 +60,16 @@ google-cloud-texttospeech>=2.30.0
 loguru>=0.7.0
 
 # WebRTC implementation for real-time communication
+opencv-python
 aiortc>=1.6.0
+pipecat[daily]
+pipecat-ai[silero]
+pipecat-ai[local-smart-turn-v3]
+pipecat-ai[webrtc]
+simli-ai
+pipecat-ai[cartesia]
+pipecat-ai[deepgram]
+pipecat-ai[daily]
+pipecat_ai_small_webrtc_prebuilt
+pipecat-ai[groq]
+groq>=0.9.0

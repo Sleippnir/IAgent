@@ -2,6 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.infrastructure.api.routes import router
 from app.infrastructure.config import Settings
+import uvicorn
+import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde el .env principal primero
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+# Luego cargar variables locales del servicio (si existen)
+load_dotenv()
 
 def create_app() -> FastAPI:
     settings = Settings()
@@ -76,9 +84,15 @@ async def exchange_invite(token: str):
     }
 
 if __name__ == "__main__":
+    # Obtener configuración desde variables de entorno
+    host = os.getenv("CORE_SERVICE_HOST", os.getenv("CORE_HOST", "0.0.0.0"))
+    port = int(os.getenv("CORE_SERVICE_PORT", os.getenv("CORE_PORT", "8001")))
+    
+    print(f"Iniciando Core Service en {host}:{port}")
+    
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
-        port=8001,
+        host=host,
+        port=port,
         reload=True
     )
