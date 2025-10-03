@@ -2,8 +2,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List
 from ..models.user import RoleResponse
-from ...infrastructure.persistence.postgres.postgres_role_repository import (
-    get, list
+from ...persistence.postgres.postgres_role_repository import (
+    get as repo_get,
+    list as repo_list,
 )
 # El gateway construye /api/v1/core/roles → Core /api/v1/roles.
 router = APIRouter(prefix="/api/v1/roles", tags=["roles"])
