@@ -32,3 +32,15 @@ logs/
 
 # Project specific
 storage/
+# Evaluator outputs
+services/evaluator/out/
+# Python caches
+__pycache__/
+.pytest_cache/
+*.pyc
+# Entornos y logs
+.venv/
+venv/
+*.log
+.env
+
