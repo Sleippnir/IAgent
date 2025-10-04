@@ -1,0 +1,7 @@
+{
+  "interview_id": "demo-001",
+  "system_prompt": "You are a technical evaluator. Be concise and rubric-based.",
+  "rubric": "Score (1-5) on Problem Solving, Python, APIs/HTTP, Databases/SQL, Communication. Justify briefly. Finish with Overall Verdict: Hire/No Hire.",
+  "jd": "Backend Python role. Flask/FastAPI, Postgres, REST, testing.",
+  "full_transcript": "Interviewer: Tell me about a REST API you built.\nCandidate: I designed endpoints with FastAPI, used pydantic models, and added pagination and auth with JWT..."
+}

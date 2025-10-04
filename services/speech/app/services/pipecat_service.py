@@ -3,6 +3,9 @@
 #
 # SPDX-License-Identifier: BSD 2-Clause License
 #
+import sys
+import asyncio
+from pathlib import Path  
 import os
 from ..infrastructure.repositories.interview_repository import SupabaseInterviewRepository
 from ..infrastructure.repositories.conversation_repository import ConversationRepository
@@ -10,6 +13,7 @@ from ..models.conversation import Conversation
 from .context_system_service import ContextService
 from ..infrastructure.repositories.questions_repository import QuestionsRepository
 from .qa_context_provider import QAContextProvider
+
 
 from dotenv import load_dotenv
 from loguru import logger
@@ -118,6 +122,42 @@ transport_params = {
         turn_analyzer=LocalSmartTurnAnalyzerV3(params=SmartTurnParams()),
     ),
 }
+
+async def _run_evaluator_for_interview(interview_id: str | int):
+    """
+    Ejecuta el evaluador:
+    python -m services.evaluator.run_one --id <interview_id> --repo supabase
+    """
+    try:
+        # repo_root = <repo>/  (subir 3 niveles desde services/speech/services/)
+        repo_root = Path(__file__).resolve().parents[3]
+
+        cmd = [
+            sys.executable, "-m", "services.evaluator.run_one",
+            "--id", str(interview_id),
+            "--repo", "supabase",
+        ]
+        logger.info(f"⚙️ Lanzando evaluador: {' '.join(cmd)} (cwd={repo_root})")
+
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            cwd=str(repo_root),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await proc.communicate()
+
+        if stdout:
+            logger.info(f"[evaluator stdout]\n{stdout.decode(errors='ignore')}")
+        if stderr:
+            logger.warning(f"[evaluator stderr]\n{stderr.decode(errors='ignore')}")
+
+        if proc.returncode != 0:
+            logger.error(f"❌ Evaluador terminó con código {proc.returncode}")
+        else:
+            logger.info("✅ Evaluador finalizado correctamente.")
+    except Exception as e:
+        logger.exception(f"❌ Error ejecutando evaluador: {e}")
 
 
 async def run_bot(webrtc_connection, runner_args: RunnerArguments, interview_id: str = None, job_role: str = None):
@@ -271,6 +311,8 @@ async def run_bot(webrtc_connection, runner_args: RunnerArguments, interview_id:
                     logger.info(f"✅ Conversación guardada en Supabase para interview_id: {interview_id}")
                     # Limpiar stream de Redis después de guardar
                     redis_client.delete_stream(stream_key)
+                    # 🔽🔽 Lanzar el evaluador para este interview_id
+                    await _run_evaluator_for_interview(interview_id)
                 else:
                     logger.error(f"❌ Error al guardar conversación en Supabase para interview_id: {interview_id}")
             else:

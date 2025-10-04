@@ -1,0 +1,248 @@
+{
+  "type": "object",
+  "properties": {
+    "interview_type": {
+      "type": "string",
+      "enum": ["technical", "behavioral", "mixed"],
+      "description": "Type of interview being evaluated"
+    },
+    "technical_evaluation": {
+      "type": "object",
+      "description": "Technical interview evaluation (if technical questions were present)",
+      "properties": {
+        "problem_understanding": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string",
+              "enum": ["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+            },
+            "rationale": {
+              "type": "string",
+              "description": "Detailed explanation of why this score was given"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Specific examples from the transcript supporting this score"
+            }
+          },
+          "required": ["score", "rationale", "evidence"]
+        },
+        "technical_skills": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string",
+              "enum": ["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["score", "rationale", "evidence"]
+        },
+        "rationale": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string",
+              "enum": ["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["score", "rationale", "evidence"]
+        },
+        "communication": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string",
+              "enum": ["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["score", "rationale", "evidence"]
+        }
+      },
+      "required": ["problem_understanding", "technical_skills", "rationale", "communication"]
+    },
+    "behavioral_evaluation": {
+      "type": "object",
+      "description": "Behavioral interview evaluation (if behavioral questions were present)",
+      "properties": {
+        "question_understanding": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string",
+              "enum": ["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["score", "rationale", "evidence"]
+        },
+        "experience_competence": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string",
+              "enum": ["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["score", "rationale", "evidence"]
+        },
+        "self_awareness": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string",
+              "enum": ["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["score", "rationale", "evidence"]
+        },
+        "communication": {
+          "type": "object",
+          "properties": {
+            "score": {
+              "type": "string",
+              "enum": ["very_weak", "weak", "strong", "very_strong", "not_applicable"]
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "required": ["score", "rationale", "evidence"]
+        }
+      },
+      "required": ["question_understanding", "experience_competence", "self_awareness", "communication"]
+    },
+    "overall_assessment": {
+      "type": "object",
+      "properties": {
+        "quantitative_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Overall score from 0-100 based on applicable rubric criteria"
+        },
+        "score_calculation": {
+          "type": "string",
+          "description": "Explanation of how the quantitative score was calculated, including which criteria were applicable"
+        },
+        "technical_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weight given to technical criteria (0-1, where 0.5 means equal weight)"
+        },
+        "behavioral_weight": {
+          "type": "number", 
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weight given to behavioral criteria (0-1, should sum to 1 with technical_weight)"
+        },
+        "recommendation": {
+          "type": "string",
+          "enum": ["strong_hire", "hire", "no_hire", "strong_no_hire"],
+          "description": "Final hiring recommendation"
+        },
+        "key_strengths": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Main strengths demonstrated by the candidate across all areas"
+        },
+        "areas_for_improvement": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Areas where the candidate could improve across all areas"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Comprehensive summary of the candidate's performance across all evaluated areas"
+        }
+      },
+      "required": ["quantitative_score", "score_calculation", "technical_weight", "behavioral_weight", "recommendation", "key_strengths", "areas_for_improvement", "summary"]
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "evaluator": {
+          "type": "string",
+          "description": "LLM model that performed the evaluation"
+        },
+        "evaluation_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rubric_version": {
+          "type": "string",
+          "description": "Version of the rubric used for evaluation"
+        }
+      },
+      "required": ["evaluator", "evaluation_timestamp", "rubric_version"]
+    }
+  },
+  "required": ["interview_type", "overall_assessment", "metadata"],
+  "anyOf": [
+    {
+      "properties": {
+        "interview_type": {"const": "technical"}
+      },
+      "required": ["technical_evaluation"]
+    },
+    {
+      "properties": {
+        "interview_type": {"const": "behavioral"}
+      },
+      "required": ["behavioral_evaluation"]
+    },
+    {
+      "properties": {
+        "interview_type": {"const": "mixed"}
+      },
+      "required": ["technical_evaluation", "behavioral_evaluation"]
+    }
+  ]
+}
