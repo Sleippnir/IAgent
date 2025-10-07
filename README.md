@@ -8,21 +8,17 @@ Plataforma de entrevistas automatizadas basada en microservicios que utiliza IA 
 
 - **API Gateway**: Punto de entrada único, maneja autenticación y enrutamiento.
 - **Core**: Gestión de usuarios, roles, invitaciones y entrevistas.
-- **Orchestrator**: Coordina la comunicación en tiempo real entre servicios.
 - **Speech**: Provee servicios de STT y TTS en tiempo real.
-- **LLM**: Integración con modelos de lenguaje para procesamiento de respuestas.
 - **Evaluation & Reporting**: Evaluación y generación de reportes.
 
 ### Infraestructura
 
 - **Redis**: Streams, Cache y almacenamiento de invitaciones
 - **PostgreSQL**: Usuarios, roles y metadatos
-- **MongoDB**: Transcripciones y reportes
 
 ## Requisitos
 
 - Docker y Docker Compose
-- NVIDIA Container Toolkit (para GPU)
 - Claves de API (OpenAI/Anthropic/etc)
 - ~20GB de espacio en disco
 
@@ -79,9 +75,7 @@ docker compose logs -f service_name
 
 - Gateway: http://localhost:8080
 - Core: http://localhost:8001
-- Orchestrator: http://localhost:8002
 - Speech: http://localhost:8003
-- LLM: http://localhost:8004
 - Evaluation: http://localhost:8005
 
 ## Monitoreo
@@ -104,13 +98,9 @@ curl http://localhost:8080/metrics
 ├── gateway/           # API Gateway + WAF
 ├── services/
 │   ├── core/         # Auth, Users, RBAC
-│   ├── orchestrator/ # Real-time coordination
 │   ├── speech/      # STT/TTS Services
-│   ├── llm/         # LLM Integration
 │   └── evaluation/  # Scoring & Reports
-├── shared/          # Shared utilities
 ├── infra/           # DB init scripts
-└── keys/            # JWT Keys
 ```
 
 ### Bibliotecas Compartidas
